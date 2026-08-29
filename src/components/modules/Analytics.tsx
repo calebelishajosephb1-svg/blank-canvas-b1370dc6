@@ -12,7 +12,15 @@ const CATEGORY_LABEL: Record<string, string> = {
   sink: "Missing sink/trap state",
 };
 
-export function Analytics({ active, onContext, onGoto }: { active: boolean; onContext: (ctx: () => string) => void; onGoto: (tab: string) => void }) {
+export function Analytics({
+  active,
+  onContext,
+  onGoto,
+}: {
+  active: boolean;
+  onContext: (ctx: () => string) => void;
+  onGoto: (tab: string) => void;
+}) {
   const [tick, setTick] = useState(0);
   useEffect(() => {
     if (active) setTick((t) => t + 1);
@@ -27,7 +35,9 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
   const solved = Storage.countSolvedUnique();
   const mistakes = Storage.getMistakeSummary().data;
   const max = Math.max(1, ...mistakes.map((m) => m.count));
-  const solvedIds = new Set(Object.keys(Storage.getStats().solves).map((k) => k.split(":").slice(1).join(":")));
+  const solvedIds = new Set(
+    Object.keys(Storage.getStats().solves).map((k) => k.split(":").slice(1).join(":")),
+  );
   const REC_REASON: Record<string, string> = {
     transition: "Missing transitions keep recurring — drill a small machine to completeness.",
     accept: "Accepting status is tripping you up — practice where runs must end.",
@@ -43,7 +53,13 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
   const misconceptions = detectMisconceptions(Storage.getAllMistakes());
 
   useEffect(() => {
-    onContext(() => buildAnalyticsContext({ attempted, solved, topMistakes: mistakes.slice(0, 3).map((m) => m.category) }));
+    onContext(() =>
+      buildAnalyticsContext({
+        attempted,
+        solved,
+        topMistakes: mistakes.slice(0, 3).map((m) => m.category),
+      }),
+    );
   }, [onContext, attempted, solved, mistakes]);
 
   return (
@@ -59,7 +75,8 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
               className="btn-ghost"
               style={{ color: "var(--signal-rose)", borderColor: "rgba(244,63,94,0.4)" }}
               onClick={() => {
-                if (confirm("Erase all local progress, saves and mistake logs?")) Storage.clearAllData();
+                if (confirm("Erase all local progress, saves and mistake logs?"))
+                  Storage.clearAllData();
               }}
             >
               🗑 Reset all data
@@ -80,15 +97,26 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
           </div>
         </div>
 
-        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}>
+        <div
+          className="grid gap-3"
+          style={{ gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))" }}
+        >
           {[
             { label: "Challenges attempted", value: attempted },
             { label: "Challenges solved", value: solved },
-            { label: "Top mistake", value: mistakes[0] ? CATEGORY_LABEL[mistakes[0].category] ?? mistakes[0].category : "—" },
+            {
+              label: "Top mistake",
+              value: mistakes[0]
+                ? (CATEGORY_LABEL[mistakes[0].category] ?? mistakes[0].category)
+                : "—",
+            },
           ].map((c) => (
             <div key={c.label} className="lab-card">
               <div className="section-label">{c.label}</div>
-              <div className="mt-1 text-2xl" style={{ fontFamily: "var(--font-display-family)", color: "var(--signal-blue)" }}>
+              <div
+                className="mt-1 text-2xl"
+                style={{ fontFamily: "var(--font-display-family)", color: "var(--signal-blue)" }}
+              >
                 {c.value}
               </div>
             </div>
@@ -108,13 +136,19 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
                 <span className="w-[180px] shrink-0 text-xs" style={{ color: "var(--ink-muted)" }}>
                   {CATEGORY_LABEL[m.category] ?? m.category}
                 </span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full" style={{ background: "var(--signal-blue-10)" }}>
+                <div
+                  className="h-2 flex-1 overflow-hidden rounded-full"
+                  style={{ background: "var(--signal-blue-10)" }}
+                >
                   <div
                     className="h-full rounded-full transition-[width] duration-500"
                     style={{ width: `${(m.count / max) * 100}%`, background: "var(--signal-blue)" }}
                   />
                 </div>
-                <span className="w-8 text-right text-xs" style={{ fontFamily: "var(--font-mono-family)" }}>
+                <span
+                  className="w-8 text-right text-xs"
+                  style={{ fontFamily: "var(--font-mono-family)" }}
+                >
                   {m.count}
                 </span>
               </div>
@@ -139,11 +173,23 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
         {!!mistakes.length && (
           <div className="mt-4">
             <div className="section-label mb-3">Recommended next</div>
-            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}>
+            <div
+              className="grid gap-3"
+              style={{ gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))" }}
+            >
               {recs.map((r) => (
                 <div key={`${r.reason}-${r.challenge.id}`} className="lab-card">
                   <div className="flex items-center justify-between">
-                    <span className="badge" data-tone={r.challenge.difficulty === "Hard" ? "reject" : r.challenge.difficulty === "Medium" ? "amber" : "accept"}>
+                    <span
+                      className="badge"
+                      data-tone={
+                        r.challenge.difficulty === "Hard"
+                          ? "reject"
+                          : r.challenge.difficulty === "Medium"
+                            ? "amber"
+                            : "accept"
+                      }
+                    >
                       {r.challenge.difficulty}
                     </span>
                   </div>
@@ -162,14 +208,29 @@ export function Analytics({ active, onContext, onGoto }: { active: boolean; onCo
 
         <div className="mt-4">
           <div className="section-label mb-3">DFA zoo</div>
-          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))" }}>
+          <div
+            className="grid gap-3"
+            style={{ gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))" }}
+          >
             {FIXED_CHALLENGES.map((c) => (
               <div key={c.id} className="lab-card">
                 <div className="flex items-center justify-between">
-                  <span className="badge" data-tone={c.difficulty === "Hard" ? "reject" : c.difficulty === "Medium" ? "amber" : "accept"}>
+                  <span
+                    className="badge"
+                    data-tone={
+                      c.difficulty === "Hard"
+                        ? "reject"
+                        : c.difficulty === "Medium"
+                          ? "amber"
+                          : "accept"
+                    }
+                  >
                     {c.difficulty}
                   </span>
-                  <span className="text-[10px]" style={{ color: "var(--ink-disabled)", fontFamily: "var(--font-mono-family)" }}>
+                  <span
+                    className="text-[10px]"
+                    style={{ color: "var(--ink-disabled)", fontFamily: "var(--font-mono-family)" }}
+                  >
                     {c.dfa.states.length} states
                   </span>
                 </div>

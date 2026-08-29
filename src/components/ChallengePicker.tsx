@@ -36,7 +36,11 @@ export function ChallengePicker({
   }, []);
 
   const sections: { key: string; label: string; items: Challenge[] }[] = [
-    ...GROUPS.map((g) => ({ key: g, label: g, items: FIXED_CHALLENGES.filter((c) => c.difficulty === g) })),
+    ...GROUPS.map((g) => ({
+      key: g,
+      label: g,
+      items: FIXED_CHALLENGES.filter((c) => c.difficulty === g),
+    })),
     { key: "custom", label: "Custom / generated", items: extra ?? [] },
     { key: "library", label: `Library ${library.length}`, items: library },
   ];
@@ -45,7 +49,11 @@ export function ChallengePicker({
     <div className="flex flex-col gap-2">
       <div className="section-label">All challenges</div>
       {sections.map((s) => (
-        <div key={s.key} className="overflow-hidden rounded-xl border" style={{ borderColor: "var(--border-subtle)" }}>
+        <div
+          key={s.key}
+          className="overflow-hidden rounded-xl border"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
           <button
             className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold"
             onClick={() => setOpen((o) => (o === s.key ? null : s.key))}
@@ -56,7 +64,11 @@ export function ChallengePicker({
           </button>
           {open === s.key && (
             <div className="flex flex-col">
-              {!s.items.length && <div className="px-3 py-2 text-xs" style={{ color: "var(--ink-disabled)" }}>Nothing here yet.</div>}
+              {!s.items.length && (
+                <div className="px-3 py-2 text-xs" style={{ color: "var(--ink-disabled)" }}>
+                  Nothing here yet.
+                </div>
+              )}
               {s.items.map((c) => (
                 <div key={c.id} className="flex items-center gap-1 px-2 py-1">
                   <button

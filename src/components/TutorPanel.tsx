@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Download, ExternalLink, Eye, EyeOff, KeyRound, Send, Settings2, Volume2, X } from "lucide-react";
+import {
+  Bot,
+  Download,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Send,
+  Settings2,
+  Volume2,
+  X,
+} from "lucide-react";
 import {
   askTutor,
   loadSettings,
@@ -46,7 +57,8 @@ function recallOpener(): string | null {
   const attempted = Storage.countAttemptedUnique();
   if (top && top.count >= 2)
     return `Picking up where you left off: **${top.category}** has tripped you up ${top.count} times. Want a quick drill aimed at exactly that?`;
-  if (attempted >= 3) return `You've attempted ${attempted} challenges and solved ${solved}. Want to push into a harder one?`;
+  if (attempted >= 3)
+    return `You've attempted ${attempted} challenges and solved ${solved}. Want to push into a harder one?`;
   return null;
 }
 
@@ -128,15 +140,37 @@ function ScratchDiagram({ sketch, onClear }: { sketch: Sketch; onClear: () => vo
                   strokeWidth={1.2}
                   opacity={0.55}
                 />
-                <text x={a.x} y={a.y - 30} textAnchor="middle" fontSize={10} fill="currentColor" opacity={0.8}>
+                <text
+                  x={a.x}
+                  y={a.y - 30}
+                  textAnchor="middle"
+                  fontSize={10}
+                  fill="currentColor"
+                  opacity={0.8}
+                >
                   {e.label}
                 </text>
               </g>
             );
           return (
             <g key={i}>
-              <line x1={a.x + 18} y1={a.y} x2={b.x - 18} y2={b.y} stroke="currentColor" strokeWidth={1.2} opacity={0.55} />
-              <text x={(a.x + b.x) / 2} y={a.y - 8} textAnchor="middle" fontSize={10} fill="currentColor" opacity={0.8}>
+              <line
+                x1={a.x + 18}
+                y1={a.y}
+                x2={b.x - 18}
+                y2={b.y}
+                stroke="currentColor"
+                strokeWidth={1.2}
+                opacity={0.55}
+              />
+              <text
+                x={(a.x + b.x) / 2}
+                y={a.y - 8}
+                textAnchor="middle"
+                fontSize={10}
+                fill="currentColor"
+                opacity={0.8}
+              >
                 {e.label}
               </text>
             </g>
@@ -153,7 +187,13 @@ function ScratchDiagram({ sketch, onClear }: { sketch: Sketch; onClear: () => vo
               strokeWidth={1.3}
               opacity={0.8}
             />
-            <text x={positions[i]!.x} y={positions[i]!.y + 4} textAnchor="middle" fontSize={11} fill="currentColor">
+            <text
+              x={positions[i]!.x}
+              y={positions[i]!.y + 4}
+              textAnchor="middle"
+              fontSize={11}
+              fill="currentColor"
+            >
               {s}
             </text>
           </g>
@@ -177,7 +217,9 @@ export function TutorPanel({
   const [settings, setSettings] = useState<TutorSettings>(() => loadSettings());
   const [showSettings, setShowSettings] = useState(false);
   const [showKey, setShowKey] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([{ role: "assistant", content: GREETING }]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: "assistant", content: GREETING },
+  ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -191,7 +233,8 @@ export function TutorPanel({
   useEffect(() => {
     setSettings(loadSettings());
     const opener = recallOpener();
-    if (opener) setMessages((m) => (m.length === 1 ? [...m, { role: "assistant", content: opener }] : m));
+    if (opener)
+      setMessages((m) => (m.length === 1 ? [...m, { role: "assistant", content: opener }] : m));
   }, []);
 
   useEffect(() => {
@@ -215,7 +258,10 @@ export function TutorPanel({
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
 
-  const rendered = useMemo(() => messages.map((m) => ({ role: m.role, ...splitThink(m.content) })), [messages]);
+  const rendered = useMemo(
+    () => messages.map((m) => ({ role: m.role, ...splitThink(m.content) })),
+    [messages],
+  );
 
   function patch(next: Partial<TutorSettings>) {
     const merged = { ...settings, ...next };
@@ -229,7 +275,9 @@ export function TutorPanel({
     const question = input.trim();
     if (!question || busy) return;
     const history = compactHistory([
-      ...messages.filter((m) => m.content !== GREETING).map((m) => ({ ...m, content: stripThink(m.content) })),
+      ...messages
+        .filter((m) => m.content !== GREETING)
+        .map((m) => ({ ...m, content: stripThink(m.content) })),
       { role: "user" as const, content: question },
     ]);
     setMessages((m) => [...m, { role: "user", content: question }]);
@@ -257,10 +305,13 @@ export function TutorPanel({
     dispatchTutorActions(actions);
     for (const a of actions) {
       if (a.type === "linkConcept")
-        setChips((c) => [...c.filter((x) => x.tab !== a.tab), { tab: a.tab, label: a.label }].slice(-3));
+        setChips((c) =>
+          [...c.filter((x) => x.tab !== a.tab), { tab: a.tab, label: a.label }].slice(-3),
+        );
       if (a.type === "readAloud") speak(a.text);
       if (a.type === "sketch") setSketch(parseSketch(a.spec, a.title));
-      if (a.type === "exportNotes") exportNotes([...messages, { role: "assistant", content: finalText }]);
+      if (a.type === "exportNotes")
+        exportNotes([...messages, { role: "assistant", content: finalText }]);
     }
   }
 
@@ -297,10 +348,18 @@ export function TutorPanel({
           >
             <Volume2 size={15} />
           </button>
-          <button className="tool-btn" title="Download session notes" onClick={() => exportNotes(messages)}>
+          <button
+            className="tool-btn"
+            title="Download session notes"
+            onClick={() => exportNotes(messages)}
+          >
             <Download size={15} />
           </button>
-          <button className="tool-btn" title="Tutor settings" onClick={() => setShowSettings((s) => !s)}>
+          <button
+            className="tool-btn"
+            title="Tutor settings"
+            onClick={() => setShowSettings((s) => !s)}
+          >
             <Settings2 size={15} />
           </button>
           <button className="tool-btn" title="Close tutor" onClick={onClose}>
@@ -313,8 +372,8 @@ export function TutorPanel({
         <div className="tutor-settings">
           <p className="section-label">Bring your own key</p>
           <p className="text-[11.5px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-            Your key is stored only in this browser and is sent directly to the provider. Nothing is proxied through
-            this app, and no one else pays for your usage.
+            Your key is stored only in this browser and is sent directly to the provider. Nothing is
+            proxied through this app, and no one else pays for your usage.
           </p>
           <label className="section-label">Provider</label>
           <select
@@ -329,7 +388,11 @@ export function TutorPanel({
             ))}
           </select>
           <label className="section-label">Model</label>
-          <select className="field-input" value={settings.model} onChange={(e) => patch({ model: e.target.value })}>
+          <select
+            className="field-input"
+            value={settings.model}
+            onChange={(e) => patch({ model: e.target.value })}
+          >
             {provider.models.map((m) => (
               <option key={m} value={m}>
                 {m}
@@ -347,7 +410,11 @@ export function TutorPanel({
               value={settings.apiKey}
               onChange={(e) => patch({ apiKey: e.target.value })}
             />
-            <button className="tool-btn" title={showKey ? "Hide key" : "Show key"} onClick={() => setShowKey((s) => !s)}>
+            <button
+              className="tool-btn"
+              title={showKey ? "Hide key" : "Show key"}
+              onClick={() => setShowKey((s) => !s)}
+            >
               {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
@@ -368,7 +435,10 @@ export function TutorPanel({
           <div key={i} className="tutor-msg" data-role={m.role}>
             {m.think && (
               <details style={{ marginBottom: 6 }}>
-                <summary className="text-[11px] cursor-pointer" style={{ color: "var(--ink-muted)" }}>
+                <summary
+                  className="text-[11px] cursor-pointer"
+                  style={{ color: "var(--ink-muted)" }}
+                >
                   How I reasoned
                 </summary>
                 <div className="text-[11px] leading-relaxed" style={{ color: "var(--ink-muted)" }}>
@@ -428,7 +498,12 @@ export function TutorPanel({
             }
           }}
         />
-        <button className="btn-primary" onClick={() => void send()} disabled={busy || !input.trim()} title="Send">
+        <button
+          className="btn-primary"
+          onClick={() => void send()}
+          disabled={busy || !input.trim()}
+          title="Send"
+        >
           <Send size={14} />
         </button>
       </div>

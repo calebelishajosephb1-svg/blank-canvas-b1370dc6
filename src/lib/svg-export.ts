@@ -13,7 +13,8 @@ function resolveVars(markup: string, scope: Element): string {
     out = out.replace(VAR_RE, (_m, token: string, fallback?: string) => {
       // Values are substituted into XML attributes, so double quotes must go
       // (computed font stacks look like: "JetBrains Mono", ui-monospace, monospace).
-      if (!cache.has(token)) cache.set(token, style.getPropertyValue(token).trim().replace(/"/g, "'"));
+      if (!cache.has(token))
+        cache.set(token, style.getPropertyValue(token).trim().replace(/"/g, "'"));
       return cache.get(token) || (fallback ?? "").trim() || "transparent";
     });
   }
@@ -43,7 +44,8 @@ export async function exportSvgToPng(
     clone.setAttribute("width", String(w));
     clone.setAttribute("height", String(h));
 
-    const bg = background ?? (getComputedStyle(svg).getPropertyValue("--bg-canvas").trim() || "#ffffff");
+    const bg =
+      background ?? (getComputedStyle(svg).getPropertyValue("--bg-canvas").trim() || "#ffffff");
     const markup = resolveVars(new XMLSerializer().serializeToString(clone), svg);
     const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`;
 

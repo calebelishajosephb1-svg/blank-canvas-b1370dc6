@@ -117,7 +117,12 @@ export const Storage = {
   },
   setProgress(challengeId: string, patch: Partial<ProgressRecord>) {
     const all = read<Record<string, ProgressRecord>>(KEYS.PROGRESS, {});
-    const prev = all[challengeId] ?? { shownAccepted: [], shownRejected: [], solved: false, attempts: 0 };
+    const prev = all[challengeId] ?? {
+      shownAccepted: [],
+      shownRejected: [],
+      solved: false,
+      attempts: 0,
+    };
     all[challengeId] = { ...prev, ...patch };
     return { ok: write(KEYS.PROGRESS, all) };
   },
@@ -140,38 +145,43 @@ export const Storage = {
   },
   getMistakeSummary() {
     const counts = new Map<string, number>();
-    for (const m of read<Mistake[]>(KEYS.MISTAKE_LOG, [])) counts.set(m.category, (counts.get(m.category) ?? 0) + 1);
+    for (const m of read<Mistake[]>(KEYS.MISTAKE_LOG, []))
+      counts.set(m.category, (counts.get(m.category) ?? 0) + 1);
     return {
       ok: true,
-      data: [...counts.entries()].map(([category, count]) => ({ category, count })).sort((a, b) => b.count - a.count),
+      data: [...counts.entries()]
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count),
     };
   },
 
   recordAttempt(moduleId: string, challengeId: string) {
-    const stats = read<{ attempts: Record<string, number>; solves: Record<string, { solvedAt: number; attempts: number }> }>(
-      KEYS.STATS,
-      { attempts: {}, solves: {} },
-    );
+    const stats = read<{
+      attempts: Record<string, number>;
+      solves: Record<string, { solvedAt: number; attempts: number }>;
+    }>(KEYS.STATS, { attempts: {}, solves: {} });
     const key = `${moduleId}:${challengeId}`;
     stats.attempts[key] = (stats.attempts[key] ?? 0) + 1;
     return { ok: write(KEYS.STATS, stats) };
   },
   recordSolve(moduleId: string, challengeId: string, attemptsCount: number) {
-    const stats = read<{ attempts: Record<string, number>; solves: Record<string, { solvedAt: number; attempts: number }> }>(
-      KEYS.STATS,
-      { attempts: {}, solves: {} },
-    );
+    const stats = read<{
+      attempts: Record<string, number>;
+      solves: Record<string, { solvedAt: number; attempts: number }>;
+    }>(KEYS.STATS, { attempts: {}, solves: {} });
     stats.solves[`${moduleId}:${challengeId}`] = { solvedAt: Date.now(), attempts: attemptsCount };
     return { ok: write(KEYS.STATS, stats) };
   },
   getStats() {
-    return read<{ attempts: Record<string, number>; solves: Record<string, { solvedAt: number; attempts: number }> }>(
-      KEYS.STATS,
-      { attempts: {}, solves: {} },
-    );
+    return read<{
+      attempts: Record<string, number>;
+      solves: Record<string, { solvedAt: number; attempts: number }>;
+    }>(KEYS.STATS, { attempts: {}, solves: {} });
   },
   countAttemptedUnique() {
-    const keys = Object.keys(Storage.getStats().attempts).map((k) => k.split(":").slice(1).join(":"));
+    const keys = Object.keys(Storage.getStats().attempts).map((k) =>
+      k.split(":").slice(1).join(":"),
+    );
     return new Set(keys).size;
   },
   countSolvedUnique() {
@@ -190,14 +200,18 @@ export const Storage = {
     return read<SerializedChallenge[]>(KEYS.AI_CHALLENGES, []).map(hydrate);
   },
   deleteAIChallenge(id: string) {
-    const ok = write(KEYS.AI_CHALLENGES, read<SerializedChallenge[]>(KEYS.AI_CHALLENGES, []).filter((c) => c.id !== id));
+    const ok = write(
+      KEYS.AI_CHALLENGES,
+      read<SerializedChallenge[]>(KEYS.AI_CHALLENGES, []).filter((c) => c.id !== id),
+    );
     emit("iale-ai-challenge-updated");
     return { ok };
   },
 
   saveToLibrary(challenge: Challenge) {
     const all = read<SerializedChallenge[]>(KEYS.LIBRARY, []);
-    if (!all.some((c) => c.id === challenge.id)) all.push({ ...serialize(challenge), savedAt: Date.now() });
+    if (!all.some((c) => c.id === challenge.id))
+      all.push({ ...serialize(challenge), savedAt: Date.now() });
     const ok = write(KEYS.LIBRARY, all);
     emit("iale-library-updated");
     return { ok };
@@ -206,7 +220,10 @@ export const Storage = {
     return read<SerializedChallenge[]>(KEYS.LIBRARY, []).map(hydrate);
   },
   removeFromLibrary(id: string) {
-    const ok = write(KEYS.LIBRARY, read<SerializedChallenge[]>(KEYS.LIBRARY, []).filter((c) => c.id !== id));
+    const ok = write(
+      KEYS.LIBRARY,
+      read<SerializedChallenge[]>(KEYS.LIBRARY, []).filter((c) => c.id !== id),
+    );
     emit("iale-library-updated");
     return { ok };
   },
@@ -216,7 +233,15 @@ export const Storage = {
 
   clearAllData() {
     if (!hasLS()) return { ok: false };
-    for (const key of [KEYS.DFA_SAVES, KEYS.PROGRESS, KEYS.MISTAKE_LOG, KEYS.STATS, KEYS.AI_CHALLENGES, KEYS.LIBRARY, KEYS.SESSION])
+    for (const key of [
+      KEYS.DFA_SAVES,
+      KEYS.PROGRESS,
+      KEYS.MISTAKE_LOG,
+      KEYS.STATS,
+      KEYS.AI_CHALLENGES,
+      KEYS.LIBRARY,
+      KEYS.SESSION,
+    ])
       window.localStorage.removeItem(key);
     emit("iale-data-cleared");
     return { ok: true };

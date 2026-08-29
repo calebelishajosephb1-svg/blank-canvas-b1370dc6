@@ -1,7 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import { ArrowRightLeft, Bot, Compass, FlaskConical, Moon, Bug, BarChart3, Sun, Workflow } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Bot,
+  Compass,
+  FlaskConical,
+  Moon,
+  Bug,
+  BarChart3,
+  Sun,
+  Workflow,
+} from "lucide-react";
 import { Converter } from "@/components/modules/Converter";
 import { Discovery } from "@/components/modules/Discovery";
 import { MutationLab } from "@/components/modules/MutationLab";
@@ -27,7 +37,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "IALE — Interactive Automata Lab" },
       {
         property: "og:description",
-        content: "Design DFAs by hand, discover hidden languages, and debug your machine against counterexamples.",
+        content:
+          "Design DFAs by hand, discover hidden languages, and debug your machine against counterexamples.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -105,7 +116,12 @@ function Index() {
         </span>
         <nav className="flex flex-wrap items-center gap-1">
           {TABS.map(({ id, label, icon: Icon }) => (
-            <button key={id} className="nav-tab" data-active={tab === id} onClick={() => setTab(id)}>
+            <button
+              key={id}
+              className="nav-tab"
+              data-active={tab === id}
+              onClick={() => setTab(id)}
+            >
               <span className="inline-flex items-center gap-1.5">
                 <Icon size={14} />
                 {label}
@@ -153,7 +169,12 @@ function Index() {
             <Analytics active={tab === "analytics"} onContext={bind("analytics")} onGoto={goto} />
           </ModulePane>
         </main>
-        <TutorPanel open={tutorOpen} onClose={() => setTutorOpen(false)} moduleId={tab} getContext={getContext} />
+        <TutorPanel
+          open={tutorOpen}
+          onClose={() => setTutorOpen(false)}
+          moduleId={tab}
+          getContext={getContext}
+        />
       </div>
       <Toaster />
     </div>
@@ -162,7 +183,10 @@ function Index() {
 
 function ModulePane({ show, children }: { show: boolean; children: React.ReactNode }) {
   return (
-    <div className="h-full min-h-0" style={{ display: show ? "flex" : "none", flexDirection: "column" }}>
+    <div
+      className="h-full min-h-0"
+      style={{ display: show ? "flex" : "none", flexDirection: "column" }}
+    >
       {children}
     </div>
   );

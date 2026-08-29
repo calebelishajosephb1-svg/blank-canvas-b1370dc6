@@ -21,7 +21,13 @@ interface Verdict {
  * Timed streak practice: rapid-fire accept/reject calls against the current
  * challenge's language. 90 seconds, streak combos, no canvas.
  */
-export function TimedPractice({ challenge, onClose }: { challenge: Challenge; onClose: () => void }) {
+export function TimedPractice({
+  challenge,
+  onClose,
+}: {
+  challenge: Challenge;
+  onClose: () => void;
+}) {
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
   const [timeLeft, setTimeLeft] = useState(DURATION_S);
@@ -83,7 +89,8 @@ export function TimedPractice({ challenge, onClose }: { challenge: Challenge; on
   };
 
   const pct = (timeLeft / DURATION_S) * 100;
-  const tone = pct < 20 ? "var(--signal-rose)" : pct < 40 ? "var(--signal-amber)" : "var(--signal-blue)";
+  const tone =
+    pct < 20 ? "var(--signal-rose)" : pct < 40 ? "var(--signal-amber)" : "var(--signal-blue)";
 
   return (
     <div
@@ -92,13 +99,22 @@ export function TimedPractice({ challenge, onClose }: { challenge: Challenge; on
       role="dialog"
       aria-label="Timed practice"
     >
-      <header className="flex h-14 shrink-0 items-center gap-4 px-5" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+      <header
+        className="flex h-14 shrink-0 items-center gap-4 px-5"
+        style={{ borderBottom: "1px solid var(--border-subtle)" }}
+      >
         <span className="brand">
           <span className="brand-dot" />
           Timed Practice
         </span>
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: "var(--signal-blue-10)" }}>
-          <div className="h-full rounded-full transition-[width] duration-1000 ease-linear" style={{ width: `${pct}%`, background: tone }} />
+        <div
+          className="h-1.5 flex-1 overflow-hidden rounded-full"
+          style={{ background: "var(--signal-blue-10)" }}
+        >
+          <div
+            className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+            style={{ width: `${pct}%`, background: tone }}
+          />
         </div>
         <span className="text-sm" style={{ fontFamily: "var(--font-mono-family)", color: tone }}>
           {timeLeft}s
@@ -129,10 +145,13 @@ export function TimedPractice({ challenge, onClose }: { challenge: Challenge; on
           <div className="lab-card max-w-md text-center">
             <h2 className="text-xl">Accept or reject?</h2>
             <p className="mt-2 text-sm" style={{ color: "var(--ink-muted)" }}>
-              {DURATION_S} seconds. Strings flash by — call whether <strong>{challenge.name}</strong> accepts each one.
-              Streaks of 5+ earn combo points.
+              {DURATION_S} seconds. Strings flash by — call whether{" "}
+              <strong>{challenge.name}</strong> accepts each one. Streaks of 5+ earn combo points.
             </p>
-            <button className="btn-primary mx-auto mt-5 inline-flex items-center gap-2" onClick={start}>
+            <button
+              className="btn-primary mx-auto mt-5 inline-flex items-center gap-2"
+              onClick={start}
+            >
               <Play size={14} /> Start
             </button>
           </div>
@@ -144,7 +163,11 @@ export function TimedPractice({ challenge, onClose }: { challenge: Challenge; on
               className="rounded-2xl border px-12 py-8 text-4xl tracking-[0.3em]"
               style={{
                 fontFamily: "var(--font-mono-family)",
-                borderColor: last ? (last.expected === last.picked ? "var(--signal-cyan)" : "var(--signal-rose)") : "var(--border-strong)",
+                borderColor: last
+                  ? last.expected === last.picked
+                    ? "var(--signal-cyan)"
+                    : "var(--signal-rose)"
+                  : "var(--border-strong)",
                 background: "var(--bg-panel)",
                 boxShadow: "var(--shadow-panel)",
                 color: "var(--ink-primary)",
@@ -169,8 +192,15 @@ export function TimedPractice({ challenge, onClose }: { challenge: Challenge; on
               </button>
             </div>
             {last && (
-              <p className="text-xs" style={{ color: last.expected === last.picked ? "var(--signal-cyan)" : "var(--signal-rose)" }}>
-                "{last.str || "ε"}" → {last.expected ? "accept" : "reject"} {last.expected === last.picked ? "— correct" : "— missed"}
+              <p
+                className="text-xs"
+                style={{
+                  color:
+                    last.expected === last.picked ? "var(--signal-cyan)" : "var(--signal-rose)",
+                }}
+              >
+                "{last.str || "ε"}" → {last.expected ? "accept" : "reject"}{" "}
+                {last.expected === last.picked ? "— correct" : "— missed"}
               </p>
             )}
           </div>
@@ -186,8 +216,18 @@ export function TimedPractice({ challenge, onClose }: { challenge: Challenge; on
                 { label: "Best streak", value: best },
                 { label: "Language", value: challenge.name },
               ].map((s) => (
-                <div key={s.label} className="rounded-xl border p-3" style={{ borderColor: "var(--border-subtle)" }}>
-                  <div className="text-lg font-bold" style={{ color: "var(--signal-blue)", fontFamily: "var(--font-display-family)" }}>
+                <div
+                  key={s.label}
+                  className="rounded-xl border p-3"
+                  style={{ borderColor: "var(--border-subtle)" }}
+                >
+                  <div
+                    className="text-lg font-bold"
+                    style={{
+                      color: "var(--signal-blue)",
+                      fontFamily: "var(--font-display-family)",
+                    }}
+                  >
                     {s.value}
                   </div>
                   <div className="section-label mt-1">{s.label}</div>

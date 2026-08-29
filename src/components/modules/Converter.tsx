@@ -17,7 +17,13 @@ import {
   type GNFAStep,
   type RepId,
 } from "@/lib/engine/convert";
-import { dfaToMachine, layoutMachine, machineToDFA, starterMachine, type Machine } from "@/lib/machine";
+import {
+  dfaToMachine,
+  layoutMachine,
+  machineToDFA,
+  starterMachine,
+  type Machine,
+} from "@/lib/machine";
 import { Storage } from "@/lib/storage";
 import { onTutorAction } from "@/lib/tutor/actions";
 import { buildConverterContext } from "@/lib/tutor/context";
@@ -25,10 +31,29 @@ import { buildConverterContext } from "@/lib/tutor/context";
 const SAVE_ID = "converter-source";
 
 type Result =
-  | { kind: "machine"; machine: Machine; alphabet: string[]; steps: string[]; identity: boolean; note: string }
-  | { kind: "regex"; regex: string | null; steps: string[]; gnfa: GNFAStep[]; verified: { equivalent: boolean; counterexample: { string: string } | null; error?: string } };
+  | {
+      kind: "machine";
+      machine: Machine;
+      alphabet: string[];
+      steps: string[];
+      identity: boolean;
+      note: string;
+    }
+  | {
+      kind: "regex";
+      regex: string | null;
+      steps: string[];
+      gnfa: GNFAStep[];
+      verified: { equivalent: boolean; counterexample: { string: string } | null; error?: string };
+    };
 
-export function Converter({ active, onContext }: { active: boolean; onContext?: (fn: () => string) => void }) {
+export function Converter({
+  active,
+  onContext,
+}: {
+  active: boolean;
+  onContext?: (fn: () => string) => void;
+}) {
   const [source, setSource] = useState<RepId>("dfa");
   const [target, setTarget] = useState<RepId>("regex");
   const [machine, setMachine] = useState<Machine>(() => starterMachine());
@@ -40,7 +65,9 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
   const [error, setError] = useState<string | null>(null);
   const [isolate, setIsolate] = useState<string | null>(null);
   const [annotations, setAnnotations] = useState<string[]>([]);
-  const [highlights, setHighlights] = useState<Record<string, "blue" | "cyan" | "rose" | "amber">>({});
+  const [highlights, setHighlights] = useState<Record<string, "blue" | "cyan" | "rose" | "amber">>(
+    {},
+  );
 
   const alphabet = useMemo(
     () => [...new Set(alphabetText.split(/[,\s]+/).filter(Boolean))],
@@ -53,7 +80,8 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
   /* ── persistence through the shared Storage layer ── */
   useEffect(() => {
     const saved = Storage.loadDFA(SAVE_ID).data;
-    if (saved?.dfa?.states?.length) setMachine(dfaToMachine(DFA.fromJSON(saved.dfa), saved.positions));
+    if (saved?.dfa?.states?.length)
+      setMachine(dfaToMachine(DFA.fromJSON(saved.dfa), saved.positions));
   }, []);
 
   useEffect(() => {
@@ -86,7 +114,11 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
       const { regex, steps } = nfaToRegex(nfa);
       const verified = regex
         ? verifyRegexAgainstDfa(regex, toDfa(nfa))
-        : { equivalent: true, counterexample: null, error: "Empty language — no regex exists (∅)." };
+        : {
+            equivalent: true,
+            counterexample: null,
+            error: "Empty language — no regex exists (∅).",
+          };
       setResult({
         kind: "regex",
         regex,
@@ -159,8 +191,11 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
 
   /* Tell the guard how far the derivation has been revealed. */
   useEffect(() => {
-    const finalVisible = !!result && (result.steps.length === 0 || logStep >= result.steps.length - 1);
-    window.dispatchEvent(new CustomEvent("iale-reveal-state", { detail: { moduleId: "converter", finalVisible } }));
+    const finalVisible =
+      !!result && (result.steps.length === 0 || logStep >= result.steps.length - 1);
+    window.dispatchEvent(
+      new CustomEvent("iale-reveal-state", { detail: { moduleId: "converter", finalVisible } }),
+    );
   }, [result, logStep]);
 
   /* ── tutor canvas-control vocabulary ── */
@@ -170,7 +205,9 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
       onTutorAction("annotateState", (a) => setAnnotations((s) => [...new Set([...s, a.state])])),
       onTutorAction("simplifyLayout", () => setMachine((m) => layoutMachine(m))),
       onTutorAction("highlight", (a) => setHighlights((h) => ({ ...h, [a.state]: a.color }))),
-      onTutorAction("animateElimination", (a) => setHighlights((h) => ({ ...h, [a.state]: "rose" }))),
+      onTutorAction("animateElimination", (a) =>
+        setHighlights((h) => ({ ...h, [a.state]: "rose" })),
+      ),
       onTutorAction("zoomTo", (a) => setHighlights((h) => ({ ...h, [a.state]: "cyan" }))),
     ];
     return () => offs.forEach((off) => off());
@@ -190,8 +227,8 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
           </span>
           <h2 className="mt-2 text-lg">Universal conversion lab</h2>
           <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
-            Any representation to any other: DFA, NFA, ε-NFA and regular expressions. Every regex result is proved
-            correct by counterexample search.
+            Any representation to any other: DFA, NFA, ε-NFA and regular expressions. Every regex
+            result is proved correct by counterexample search.
           </p>
         </div>
 
@@ -230,7 +267,11 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
             ))}
           </div>
           <label className="section-label mt-3 block">Alphabet</label>
-          <input className="field-input" value={alphabetText} onChange={(e) => setAlphabetText(e.target.value)} />
+          <input
+            className="field-input"
+            value={alphabetText}
+            onChange={(e) => setAlphabetText(e.target.value)}
+          />
           <button className="btn-primary mt-3 w-full" onClick={convert} disabled={!!sameNote}>
             <span className="inline-flex items-center justify-center gap-1.5">
               <ArrowRightLeft size={14} /> Convert
@@ -259,16 +300,27 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
                 style={{ fontFamily: "var(--font-mono-family)" }}
               >
                 {result.steps.slice(0, logStep + 1).map((s, i) => (
-                  <div key={i} style={{ color: i === logStep ? "var(--ink-primary)" : "var(--ink-muted)" }}>
+                  <div
+                    key={i}
+                    style={{ color: i === logStep ? "var(--ink-primary)" : "var(--ink-muted)" }}
+                  >
                     {s}
                   </div>
                 ))}
               </div>
               <div className="mt-2 flex gap-2">
-                <button className="tool-btn" title="Back" onClick={() => setLogStep((s) => Math.max(0, s - 1))}>
+                <button
+                  className="tool-btn"
+                  title="Back"
+                  onClick={() => setLogStep((s) => Math.max(0, s - 1))}
+                >
                   ◀
                 </button>
-                <button className="tool-btn" title="Play to end" onClick={() => setLogStep(result.steps.length - 1)}>
+                <button
+                  className="tool-btn"
+                  title="Play to end"
+                  onClick={() => setLogStep(result.steps.length - 1)}
+                >
                   ▶▶
                 </button>
                 <button
@@ -296,12 +348,20 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
             {REPS.find((r) => r.id === source)?.label} → {REPS.find((r) => r.id === target)?.label}
           </span>
           {isolate && (
-            <button className="tool-btn" title="Clear symbol isolation" onClick={() => setIsolate(null)}>
+            <button
+              className="tool-btn"
+              title="Clear symbol isolation"
+              onClick={() => setIsolate(null)}
+            >
               showing only “{isolate}” ✕
             </button>
           )}
           {annotations.length > 0 && (
-            <button className="tool-btn" title="Clear tutor markers" onClick={() => setAnnotations([])}>
+            <button
+              className="tool-btn"
+              title="Clear tutor markers"
+              onClick={() => setAnnotations([])}
+            >
               clear ? markers
             </button>
           )}
@@ -322,7 +382,9 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
           style={{ gridTemplateColumns: "1fr 1fr", background: "var(--border-subtle)" }}
         >
           <div className="flex min-h-0 flex-col">
-            <div className="section-label px-3 py-2">Source — {REPS.find((r) => r.id === source)?.label}</div>
+            <div className="section-label px-3 py-2">
+              Source — {REPS.find((r) => r.id === source)?.label}
+            </div>
             {source === "regex" ? (
               <div className="canvas-surface flex flex-col gap-2 p-4">
                 <label className="section-label">Regular expression</label>
@@ -356,7 +418,9 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
           </div>
 
           <div className="flex min-h-0 flex-col">
-            <div className="section-label px-3 py-2">Result — {REPS.find((r) => r.id === target)?.label}</div>
+            <div className="section-label px-3 py-2">
+              Result — {REPS.find((r) => r.id === target)?.label}
+            </div>
             {result?.kind === "machine" ? (
               <DFACanvas
                 machine={result.machine}
@@ -389,20 +453,29 @@ export function Converter({ active, onContext }: { active: boolean; onContext?: 
                   >
                     <Copy size={14} />
                   </button>
-                  <span className="badge" data-tone={result.verified.equivalent ? "accept" : "reject"}>
+                  <span
+                    className="badge"
+                    data-tone={result.verified.equivalent ? "accept" : "reject"}
+                  >
                     {result.verified.equivalent
                       ? "✓ equivalent — tested via counterexample search"
                       : `these differ on "${result.verified.counterexample?.string || "ε"}"`}
                   </span>
                 </div>
                 <p className="text-[11.5px]" style={{ color: "var(--ink-muted)" }}>
-                  <Wand2 size={11} className="inline" /> Elimination order (lowest degree first) is what determines how
-                  messy the raw result looks — the cleanup pass is cosmetic only.
+                  <Wand2 size={11} className="inline" /> Elimination order (lowest degree first) is
+                  what determines how messy the raw result looks — the cleanup pass is cosmetic
+                  only.
                 </p>
               </div>
             ) : (
-              <div className="canvas-surface flex items-center justify-center p-6 text-center text-xs" style={{ color: "var(--ink-disabled)" }}>
-                {sameNote ? `Already a ${sameNote.label} — nothing to convert.` : "No result yet — press Convert."}
+              <div
+                className="canvas-surface flex items-center justify-center p-6 text-center text-xs"
+                style={{ color: "var(--ink-disabled)" }}
+              >
+                {sameNote
+                  ? `Already a ${sameNote.label} — nothing to convert.`
+                  : "No result yet — press Convert."}
               </div>
             )}
           </div>

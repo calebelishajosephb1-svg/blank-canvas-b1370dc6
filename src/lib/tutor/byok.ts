@@ -67,7 +67,9 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
       messages: [{ role: "system", content: system }, ...messages],
     }),
     parse: (json) =>
-      text((json as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content).trim(),
+      text(
+        (json as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content,
+      ).trim(),
   },
   nvidia: {
     id: "nvidia",
@@ -90,7 +92,9 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
       messages: [{ role: "system", content: system }, ...messages],
     }),
     parse: (json) =>
-      text((json as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content).trim(),
+      text(
+        (json as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content,
+      ).trim(),
   },
   openrouter: {
     id: "openrouter",
@@ -106,7 +110,9 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
       messages: [{ role: "system", content: system }, ...messages],
     }),
     parse: (json) =>
-      text((json as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content).trim(),
+      text(
+        (json as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content,
+      ).trim(),
   },
   google: {
     id: "google",
@@ -126,8 +132,12 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     }),
     parse: (json) => {
       const parts =
-        (json as { candidates?: { content?: { parts?: { text?: string }[] } }[] }).candidates?.[0]?.content?.parts ?? [];
-      return parts.map((p) => text(p.text)).join("").trim();
+        (json as { candidates?: { content?: { parts?: { text?: string }[] } }[] }).candidates?.[0]
+          ?.content?.parts ?? [];
+      return parts
+        .map((p) => text(p.text))
+        .join("")
+        .trim();
     },
   },
 };
@@ -154,7 +164,8 @@ export function loadSettings(): TutorSettings {
     const raw = window.localStorage.getItem(BYOK_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<TutorSettings>;
-    const provider: ProviderId = parsed.provider && PROVIDERS[parsed.provider] ? parsed.provider : "anthropic";
+    const provider: ProviderId =
+      parsed.provider && PROVIDERS[parsed.provider] ? parsed.provider : "anthropic";
     return {
       provider,
       model: parsed.model || PROVIDERS[provider].models[0]!,
@@ -174,7 +185,9 @@ export function saveSettings(s: TutorSettings) {
   }
 }
 
-export const SYSTEM = (moduleContext: string) => `You are Socratic, the IALE tutor — a warm, brilliant Socratic guide inside an interactive automata lab. The student is a 2nd-year CS undergraduate building DFAs by hand.
+export const SYSTEM = (
+  moduleContext: string,
+) => `You are Socratic, the IALE tutor — a warm, brilliant Socratic guide inside an interactive automata lab. The student is a 2nd-year CS undergraduate building DFAs by hand.
 
 ════════ OUTPUT ════════
 - Reply in tight markdown. 120 words max unless the student asks for theory.
@@ -238,7 +251,8 @@ export async function askTutor(
   }
   const p = PROVIDERS[settings.provider];
   const model = settings.model || p.models[0]!;
-  const url = p.id === "google" ? `${p.endpoint}/${encodeURIComponent(model)}:generateContent` : p.endpoint;
+  const url =
+    p.id === "google" ? `${p.endpoint}/${encodeURIComponent(model)}:generateContent` : p.endpoint;
 
   try {
     const res = await fetch(url, {
@@ -248,13 +262,17 @@ export async function askTutor(
       ...(signal ? { signal } : {}),
     });
 
-
     if (!res.ok) {
       const detail = (await res.text()).slice(0, 200);
       if (res.status === 401 || res.status === 403)
-        return { ok: false, error: `${p.label} rejected the key (${res.status}). Check it in tutor settings.` };
-      if (res.status === 429) return { ok: false, error: `${p.label} is rate limiting you — try again shortly.` };
-      if (res.status === 402) return { ok: false, error: `Your ${p.label} account is out of credit.` };
+        return {
+          ok: false,
+          error: `${p.label} rejected the key (${res.status}). Check it in tutor settings.`,
+        };
+      if (res.status === 429)
+        return { ok: false, error: `${p.label} is rate limiting you — try again shortly.` };
+      if (res.status === 402)
+        return { ok: false, error: `Your ${p.label} account is out of credit.` };
       return { ok: false, error: `${p.label} returned ${res.status}. ${detail}` };
     }
 

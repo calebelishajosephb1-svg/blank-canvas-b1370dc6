@@ -17,7 +17,9 @@ export function summarizeMachine(machine: Machine, alphabet: string[]): MachineS
     states: machine.states.map(
       (s) => `${s.label}${s.isStart ? "(start)" : ""}${s.isAccepting ? "(accept)" : ""}`,
     ),
-    transitions: machine.transitions.flatMap((t) => t.symbols.map((sym) => `${label(t.from)} --${sym}--> ${label(t.to)}`)),
+    transitions: machine.transitions.flatMap((t) =>
+      t.symbols.map((sym) => `${label(t.from)} --${sym}--> ${label(t.to)}`),
+    ),
     alphabet,
     stateCount: machine.states.length,
     transCount: machine.transitions.reduce((n, t) => n + t.symbols.length, 0),
@@ -93,7 +95,11 @@ export function buildMutationContext(d: {
   ].join("\n");
 }
 
-export function buildAnalyticsContext(d: { attempted: number; solved: number; topMistakes: string[] }): string {
+export function buildAnalyticsContext(d: {
+  attempted: number;
+  solved: number;
+  topMistakes: string[];
+}): string {
   return [
     "Module: Analytics.",
     `Attempted: ${d.attempted}, solved: ${d.solved}. Recurring mistake categories: ${d.topMistakes.join(", ") || "none yet"}.`,

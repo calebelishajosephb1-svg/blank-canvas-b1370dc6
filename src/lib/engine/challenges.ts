@@ -33,7 +33,13 @@ function buildDFA(spec: Spec): DFA {
   });
 }
 
-function modDFA(alphabet: string[], n: number, label: string, acceptResidues: number[], bitValue: (s: string) => number): Spec {
+function modDFA(
+  alphabet: string[],
+  n: number,
+  label: string,
+  acceptResidues: number[],
+  bitValue: (s: string) => number,
+): Spec {
   const states = Array.from({ length: n }, (_, i) => `${label}${i}`);
   const delta: TransitionMap = {};
   states.forEach((s, i) => {
@@ -41,7 +47,13 @@ function modDFA(alphabet: string[], n: number, label: string, acceptResidues: nu
     for (const sym of alphabet) row[sym] = `${label}${(i * alphabet.length + bitValue(sym)) % n}`;
     delta[s] = row;
   });
-  return { states, alphabet, start: states[0] ?? `${label}0`, accept: acceptResidues.map((r) => `${label}${r}`), delta };
+  return {
+    states,
+    alphabet,
+    start: states[0] ?? `${label}0`,
+    accept: acceptResidues.map((r) => `${label}${r}`),
+    delta,
+  };
 }
 
 const BIN = ["0", "1"];
@@ -288,7 +300,10 @@ export const challengeGenerator = {
         const base = regexToDFA(`(0|1)*${pattern}(0|1)*`, alphabet);
         if (!base) return null;
         const total = base.complete();
-        const dfa = new DFA({ ...total.toJSON(), acceptStates: total.states.filter((s) => !total.isAccepting(s)) });
+        const dfa = new DFA({
+          ...total.toJSON(),
+          acceptStates: total.states.filter((s) => !total.isAccepting(s)),
+        });
         return {
           id: `gen-notcontains-${Date.now()}`,
           name: `Avoids ${pattern}`,
@@ -363,7 +378,11 @@ export const challengeGenerator = {
     };
   },
 
-  fromRegex(regex: string, alphabet: string[], meta?: { name?: string; difficulty?: Difficulty; description?: string }): Challenge | null {
+  fromRegex(
+    regex: string,
+    alphabet: string[],
+    meta?: { name?: string; difficulty?: Difficulty; description?: string },
+  ): Challenge | null {
     const check = validateRegex(regex, alphabet);
     if (!check.valid) return null;
     const dfa = regexToDFA(regex, alphabet);

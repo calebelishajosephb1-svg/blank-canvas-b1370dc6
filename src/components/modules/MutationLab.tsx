@@ -11,7 +11,13 @@ import { dfaToMachine, layoutMachine, machineToDFA, useMachine, type Machine } f
 import { useCanvasShortcuts } from "@/lib/useCanvasShortcuts";
 import { buildMutationContext } from "@/lib/tutor/context";
 
-export function MutationLab({ active, onContext }: { active: boolean; onContext: (ctx: () => string) => void }) {
+export function MutationLab({
+  active,
+  onContext,
+}: {
+  active: boolean;
+  onContext: (ctx: () => string) => void;
+}) {
   const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[0]!);
   const [mode, setMode] = useState<CanvasMode>("pointer");
   const [diff, setDiff] = useState<LanguageDiff | null>(null);
@@ -54,7 +60,12 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
     }
     const d = languageDiff(challenge.dfa, mutated);
     setDiff(d);
-    setHistory((h) => [{ at: Date.now(), machine, label: d.isEquivalent ? "equivalent" : "changed" }, ...h].slice(0, 25));
+    setHistory((h) =>
+      [{ at: Date.now(), machine, label: d.isEquivalent ? "equivalent" : "changed" }, ...h].slice(
+        0,
+        25,
+      ),
+    );
   };
 
   const testBoth = () => {
@@ -74,7 +85,8 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
           </span>
           <h2 className="mt-2 text-lg">{challenge.name}</h2>
           <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
-            Change one edge or one accepting flag on the right, then read what the language lost and gained.
+            Change one edge or one accepting flag on the right, then read what the language lost and
+            gained.
           </p>
         </div>
 
@@ -88,11 +100,20 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
             )}
           </div>
           {diff ? (
-            <div className="flex flex-col gap-2 text-xs" style={{ fontFamily: "var(--font-mono-family)" }}>
+            <div
+              className="flex flex-col gap-2 text-xs"
+              style={{ fontFamily: "var(--font-mono-family)" }}
+            >
               <div className="tape-row" data-verdict="reject">
                 <span>lost: {diff.lostExample === null ? "—" : diff.lostExample || "ε"}</span>
                 {diff.lostExample !== null && (
-                  <button className="btn-ghost" onClick={() => { setTestStr(diff.lostExample!); setTestOut(null); }}>
+                  <button
+                    className="btn-ghost"
+                    onClick={() => {
+                      setTestStr(diff.lostExample!);
+                      setTestOut(null);
+                    }}
+                  >
                     Replay
                   </button>
                 )}
@@ -100,13 +121,21 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
               <div className="tape-row" data-verdict="accept">
                 <span>gained: {diff.gainedExample === null ? "—" : diff.gainedExample || "ε"}</span>
                 {diff.gainedExample !== null && (
-                  <button className="btn-ghost" onClick={() => { setTestStr(diff.gainedExample!); setTestOut(null); }}>
+                  <button
+                    className="btn-ghost"
+                    onClick={() => {
+                      setTestStr(diff.gainedExample!);
+                      setTestOut(null);
+                    }}
+                  >
                     Replay
                   </button>
                 )}
               </div>
               <span className="badge" data-tone={diff.isStillMinimal ? "accept" : "amber"}>
-                {diff.isStillMinimal ? "still minimal" : `minimizes to ${minimize(mutated).states.length} states`}
+                {diff.isStillMinimal
+                  ? "still minimal"
+                  : `minimizes to ${minimize(mutated).states.length} states`}
               </span>
             </div>
           ) : (
@@ -155,10 +184,19 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
           <button className="btn-ghost" onClick={() => replace(original)}>
             Reset
           </button>
-          <button className="btn-ghost" onClick={() => replace(layoutMachine(dfaToMachine(minimize(mutated))))}>
+          <button
+            className="btn-ghost"
+            onClick={() => replace(layoutMachine(dfaToMachine(minimize(mutated))))}
+          >
             Minimize
           </button>
-          <input className="field-input" style={{ width: 120 }} placeholder="test string" value={testStr} onChange={(e) => setTestStr(e.target.value)} />
+          <input
+            className="field-input"
+            style={{ width: 120 }}
+            placeholder="test string"
+            value={testStr}
+            onChange={(e) => setTestStr(e.target.value)}
+          />
           <button className="btn-ghost" onClick={testBoth}>
             Test both
           </button>
@@ -167,7 +205,10 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
           </button>
         </CanvasToolbar>
 
-        <div className="dual-canvas grid flex-1 min-h-0 gap-px" style={{ gridTemplateColumns: "1fr 1fr", background: "var(--border-subtle)" }}>
+        <div
+          className="dual-canvas grid flex-1 min-h-0 gap-px"
+          style={{ gridTemplateColumns: "1fr 1fr", background: "var(--border-subtle)" }}
+        >
           <div className="flex min-h-0 flex-col">
             <div className="section-label px-3 py-2">Original (read-only)</div>
             <DFACanvas machine={original} alphabet={alphabet} editable={false} mode="pointer" />
@@ -187,8 +228,16 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
           </div>
         </div>
 
-        <div className="px-4 py-3 text-xs" style={{ borderTop: "2px solid var(--signal-blue)", color: "var(--ink-muted)", fontFamily: "var(--font-mono-family)" }}>
-          {testOut ?? "Two machines, one language question: does your edit actually change what is accepted?"}
+        <div
+          className="px-4 py-3 text-xs"
+          style={{
+            borderTop: "2px solid var(--signal-blue)",
+            color: "var(--ink-muted)",
+            fontFamily: "var(--font-mono-family)",
+          }}
+        >
+          {testOut ??
+            "Two machines, one language question: does your edit actually change what is accepted?"}
         </div>
       </section>
     </div>

@@ -171,9 +171,7 @@ export const Storage = {
     }>(KEYS.STATS, { attempts: {}, solves: {} });
     stats.solves[`${moduleId}:${challengeId}`] = { solvedAt: Date.now(), attempts: attemptsCount };
     const ok = write(KEYS.STATS, stats);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("iale-stats-updated"));
-    }
+    emit("iale-stats-updated");
     return { ok };
   },
   getStats() {

@@ -15,7 +15,8 @@ export function useCanvasShortcuts(
       if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         e.preventDefault();
-        e.shiftKey ? handlers.redo?.() : handlers.undo?.();
+        if (e.shiftKey) handlers.redo?.();
+        else handlers.undo?.();
         return;
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {

@@ -10,6 +10,10 @@ import { Analytics } from "@/components/modules/Analytics";
 import { NFALab } from "@/components/modules/NFALab";
 import { TutorPanel } from "@/components/TutorPanel";
 import { useTheme } from "@/lib/theme";
+import { Storage } from "@/lib/storage";
+import { detectMisconceptions } from "@/lib/engine/algorithms";
+import { onTutorAction } from "@/lib/tutor/actions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,7 +60,18 @@ function Index() {
     [],
   );
 
-  const getContext = useCallback(() => contexts.current[tab]?.() ?? `Module: ${tab}. No context available.`, [tab]);
+  // Cross-module awareness: every module context is suffixed with the learner's
+  // aggregate record so the tutor can connect today's slip to a recurring habit.
+  const getContext = useCallback(() => {
+    const base = contexts.current[tab]?.() ?? `Module: ${tab}. No context available.`;
+    const stats = Storage.getStats();
+    const habits = detectMisconceptions(Storage.getAllMistakes());
+    return [
+      base,
+      `Learner record: attempted ${stats.attempted?.length ?? Storage.countAttemptedUnique()} unique challenges, solved ${Storage.countSolvedUnique()}.`,
+      habits.length ? `Recurring habits: ${habits.join(" ")}` : "No recurring habit detected yet.",
+    ].join("\n");
+  }, [tab]);
 
   const goto = useCallback((next: string) => {
     if (TABS.some((t) => t.id === next)) setTab(next as TabId);
@@ -68,7 +83,18 @@ function Index() {
       if (detail?.type === "gotoTab" && detail.tab) goto(detail.tab);
     };
     window.addEventListener("iale-tutor-action", handler);
-    return () => window.removeEventListener("iale-tutor-action", handler);
+    const offs = [
+      onTutorAction("celebrate", () => toast.success("Nice work — that reasoning held up.")),
+      onTutorAction("streakNudge", () =>
+        toast("You're on a roll — want a harder language next?", {
+          description: "Ask Socratic for a step up, or load a Hard challenge.",
+        }),
+      ),
+    ];
+    return () => {
+      window.removeEventListener("iale-tutor-action", handler);
+      offs.forEach((off) => off());
+    };
   }, [goto]);
 
   return (

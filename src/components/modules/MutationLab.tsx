@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DFACanvas, type CanvasMode } from "@/components/DFACanvas";
+import { useCanvasAttention } from "@/lib/tutor/useCanvasAttention";
 import { CanvasToolbar } from "@/components/CanvasToolbar";
 import { ChallengePicker } from "@/components/ChallengePicker";
 import { FIXED_CHALLENGES, type Challenge } from "@/lib/engine/challenges";
@@ -172,7 +173,16 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
           </div>
           <div className="flex min-h-0 flex-col">
             <div className="section-label px-3 py-2">Your mutation</div>
-            <DFACanvas machine={machine} onChange={commit} onTransientChange={set} alphabet={alphabet} mode={mode} />
+            <DFACanvas
+              machine={machine}
+              onChange={commit}
+              onTransientChange={set}
+              alphabet={alphabet}
+              mode={mode}
+              isolateSymbol={attention.isolateSymbol}
+              annotations={attention.annotations}
+              highlightTransition={attention.highlightTransition}
+            />
           </div>
         </div>
 

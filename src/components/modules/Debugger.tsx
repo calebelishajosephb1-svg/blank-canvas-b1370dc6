@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DFACanvas, type CanvasMode, type HighlightTone } from "@/components/DFACanvas";
+import { useCanvasAttention } from "@/lib/tutor/useCanvasAttention";
 import { CanvasToolbar } from "@/components/CanvasToolbar";
 import { ChallengePicker } from "@/components/ChallengePicker";
 import { FIXED_CHALLENGES, type Challenge } from "@/lib/engine/challenges";
@@ -245,7 +246,17 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
           </button>
         </CanvasToolbar>
 
-        <DFACanvas machine={machine} onChange={commit} onTransientChange={set} alphabet={alphabet} mode={mode} highlights={highlights} />
+        <DFACanvas
+          machine={machine}
+          onChange={commit}
+          onTransientChange={set}
+          alphabet={alphabet}
+          mode={mode}
+          highlights={highlights}
+          isolateSymbol={attention.isolateSymbol}
+          annotations={attention.annotations}
+          highlightTransition={attention.highlightTransition}
+        />
 
         <div
           className="flex min-h-[64px] flex-col justify-center gap-1 px-4 py-3"

@@ -96,7 +96,7 @@ for (const diff of ["Easy","Medium","Hard"] as const) {
   const b = regexToDFA("(0|1)*1", ["0","1"])!;
   const ce = findCounterexample(a, b);
   ok(ce !== null, "expected counterexample between complement languages");
-  if (ce) ok(a.run(ce.str) !== b.run(ce.str), `counterexample "${ce.str}" is not a real witness`);
+  if (ce) ok(a.run(ce.string) !== b.run(ce.string), `counterexample "${ce.string}" is not a real witness`);
   ok(!isEquivalent(a, b), "isEquivalent said equal for different languages");
 }
 

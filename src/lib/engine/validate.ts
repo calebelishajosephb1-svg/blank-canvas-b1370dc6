@@ -29,7 +29,8 @@ export function validateDFA(dfa: DFA): string[] {
   const errors: string[] = [];
   if (!dfa.states.length) return ["Add at least one state."];
   if (!dfa.startState) errors.push("No start state — right-click a state and set it as start.");
-  if (!dfa.acceptStates.length) errors.push("No accepting state — a DFA that accepts nothing can't match a language.");
+  if (!dfa.acceptStates.length)
+    errors.push("No accepting state — a DFA that accepts nothing can't match a language.");
   const reachable = dfa.startState ? dfa.reachableStates() : new Set<string>();
   const missing: string[] = [];
   for (const s of reachable) {
@@ -37,7 +38,10 @@ export function validateDFA(dfa: DFA): string[] {
       if (!dfa.transition(s, sym)) missing.push(`${s} on "${sym}"`);
     }
   }
-  if (missing.length) errors.push(`Missing transitions: ${missing.slice(0, 6).join(", ")}${missing.length > 6 ? "…" : ""}`);
+  if (missing.length)
+    errors.push(
+      `Missing transitions: ${missing.slice(0, 6).join(", ")}${missing.length > 6 ? "…" : ""}`,
+    );
   return errors;
 }
 

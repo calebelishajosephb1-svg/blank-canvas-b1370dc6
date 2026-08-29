@@ -53,7 +53,8 @@ export function Discovery({
   const [regexErr, setRegexErr] = useState<string | null>(null);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [creatorOpen, setCreatorOpen] = useState(false);
-  const { machine, commit, set, replace, undo, redo, canUndo, canRedo } = useMachine(starterMachine());
+  const { machine, commit, set, replace, undo, redo, canUndo, canRedo } =
+    useMachine(starterMachine());
   const saveTimer = useRef<number | null>(null);
   /** Tutor difficulty bias (IALE_ADJUST_DIFFICULTY) applied to the next generated language. */
   const bias = useRef(0);
@@ -83,7 +84,13 @@ export function Discovery({
         ...shownRejected.map((str) => ({ str, accept: false })),
       ]);
       const save = Storage.loadDFA(`discovery:${ch.id}`).data;
-      if (save) replace(dfaToMachine(new (dfa.constructor as new (a: unknown) => never)(save.dfa) as never, save.positions));
+      if (save)
+        replace(
+          dfaToMachine(
+            new (dfa.constructor as new (a: unknown) => never)(save.dfa) as never,
+            save.positions,
+          ),
+        );
       else replace(starterMachine());
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,8 +165,14 @@ export function Discovery({
   const addExample = (str: string, accept: boolean) => {
     setExamples((prev) => (prev.some((e) => e.str === str) ? prev : [...prev, { str, accept }]));
     Storage.setProgress(challenge.id, {
-      shownAccepted: [...examples.filter((e) => e.accept).map((e) => e.str), ...(accept ? [str] : [])],
-      shownRejected: [...examples.filter((e) => !e.accept).map((e) => e.str), ...(accept ? [] : [str])],
+      shownAccepted: [
+        ...examples.filter((e) => e.accept).map((e) => e.str),
+        ...(accept ? [str] : []),
+      ],
+      shownRejected: [
+        ...examples.filter((e) => !e.accept).map((e) => e.str),
+        ...(accept ? [] : [str]),
+      ],
     });
   };
 
@@ -211,11 +224,15 @@ export function Discovery({
     }
     setExtra((prev) => [ch, ...prev].slice(0, 12));
     setChallengeAndReset(ch, index + 1);
-    toast("New hidden language loaded", { description: `${ch.difficulty} · Σ = {${ch.alphabet.join(",")}}` });
+    toast("New hidden language loaded", {
+      description: `${ch.difficulty} · Σ = {${ch.alphabet.join(",")}}`,
+    });
   };
 
   const loadRegex = () => {
-    const ch = challengeGenerator.fromRegex(regex.trim(), alphabet, { name: `Custom: ${regex.trim()}` });
+    const ch = challengeGenerator.fromRegex(regex.trim(), alphabet, {
+      name: `Custom: ${regex.trim()}`,
+    });
     if (!ch) {
       setRegexErr("That pattern doesn't parse over this alphabet.");
       return;
@@ -235,7 +252,11 @@ export function Discovery({
       if (action.type === "showExample") addExample(action.str, action.accept);
       if (action.type === "adjustDifficulty") {
         bias.current = action.direction === "up" ? 1 : -1;
-        toast(action.direction === "up" ? "Next language will be a step harder" : "Next language will be gentler");
+        toast(
+          action.direction === "up"
+            ? "Next language will be a step harder"
+            : "Next language will be gentler",
+        );
       }
       if (action.type === "challenge") {
         const ch = challengeGenerator.fromRegex(action.regex, action.alphabet, {
@@ -265,7 +286,10 @@ export function Discovery({
     commit((m) => {
       const kept = m.states.filter((s) => reach.has(s.label));
       const ids = new Set(kept.map((s) => s.id));
-      return { states: kept, transitions: m.transitions.filter((t) => ids.has(t.from) && ids.has(t.to)) };
+      return {
+        states: kept,
+        transitions: m.transitions.filter((t) => ids.has(t.from) && ids.has(t.to)),
+      };
     });
     toast.success("Unreachable states removed");
   };
@@ -297,7 +321,16 @@ export function Discovery({
             <span className="badge" data-tone="blue">
               Challenge {index}
             </span>
-            <span className="badge" data-tone={challenge.difficulty === "Hard" ? "reject" : challenge.difficulty === "Medium" ? "amber" : "accept"}>
+            <span
+              className="badge"
+              data-tone={
+                challenge.difficulty === "Hard"
+                  ? "reject"
+                  : challenge.difficulty === "Medium"
+                    ? "amber"
+                    : "accept"
+              }
+            >
               {challenge.difficulty}
             </span>
             {saveState !== "idle" && (
@@ -308,7 +341,9 @@ export function Discovery({
           </div>
           <h2 className="text-lg">{solved ? challenge.name : "???"}</h2>
           <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
-            {solved ? challenge.description : "Infer the hidden language from the labelled tape, then build the DFA that decides it."}
+            {solved
+              ? challenge.description
+              : "Infer the hidden language from the labelled tape, then build the DFA that decides it."}
           </p>
         </div>
 
@@ -329,7 +364,9 @@ export function Discovery({
                 title="Run this string on your machine"
               >
                 <span>{ex.str === "" ? "ε" : ex.str}</span>
-                <span style={{ color: ex.accept ? "var(--signal-cyan)" : "var(--signal-rose)" }}>{ex.accept ? "✓ accept" : "✗ reject"}</span>
+                <span style={{ color: ex.accept ? "var(--signal-cyan)" : "var(--signal-rose)" }}>
+                  {ex.accept ? "✓ accept" : "✗ reject"}
+                </span>
               </button>
             ))}
           </div>
@@ -338,7 +375,10 @@ export function Discovery({
         <div className="lab-card">
           <div className="flex items-center justify-between">
             <span className="section-label">Hints</span>
-            <button className="btn-ghost" onClick={() => setHintIndex((h) => Math.min(hints.length, h + 1))}>
+            <button
+              className="btn-ghost"
+              onClick={() => setHintIndex((h) => Math.min(hints.length, h + 1))}
+            >
               Reveal hint {Math.min(hints.length, hintIndex + 1)}
             </button>
           </div>
@@ -354,7 +394,12 @@ export function Discovery({
         <div className="lab-card">
           <div className="section-label mb-2">Custom language (regex)</div>
           <div className="flex gap-2">
-            <input className="field-input" placeholder="(0|1)*01" value={regex} onChange={(e) => setRegex(e.target.value)} />
+            <input
+              className="field-input"
+              placeholder="(0|1)*01"
+              value={regex}
+              onChange={(e) => setRegex(e.target.value)}
+            />
             <button className="btn-ghost" onClick={loadRegex}>
               Load
             </button>
@@ -368,8 +413,14 @@ export function Discovery({
 
         <ChallengePicker
           activeId={challenge.id}
+          maskNames
           extra={extra}
-          onPick={(c) => setChallengeAndReset(c, FIXED_CHALLENGES.findIndex((f) => f.id === c.id) + 1 || index + 1)}
+          onPick={(c) =>
+            setChallengeAndReset(
+              c,
+              FIXED_CHALLENGES.findIndex((f) => f.id === c.id) + 1 || index + 1,
+            )
+          }
         />
       </aside>
 
@@ -385,13 +436,25 @@ export function Discovery({
           onLayout={() => commit((m) => layoutMachine(m))}
           alphabet={alphabet}
         >
-          <button className="btn-ghost inline-flex items-center gap-1.5" title="Copy a shareable link to this machine" onClick={share}>
+          <button
+            className="btn-ghost inline-flex items-center gap-1.5"
+            title="Copy a shareable link to this machine"
+            onClick={share}
+          >
             <Share2 size={13} /> Share
           </button>
-          <button className="btn-ghost inline-flex items-center gap-1.5" title="Build your own challenge" onClick={() => setCreatorOpen(true)}>
+          <button
+            className="btn-ghost inline-flex items-center gap-1.5"
+            title="Build your own challenge"
+            onClick={() => setCreatorOpen(true)}
+          >
             <Wrench size={13} /> Create
           </button>
-          <button className="btn-ghost inline-flex items-center gap-1.5" title="Timed accept/reject streak practice" onClick={() => setPracticeOpen(true)}>
+          <button
+            className="btn-ghost inline-flex items-center gap-1.5"
+            title="Timed accept/reject streak practice"
+            onClick={() => setPracticeOpen(true)}
+          >
             <Timer size={13} /> Practice
           </button>
           <button className="btn-ghost" onClick={loadRandom}>
@@ -418,14 +481,21 @@ export function Discovery({
           className="flex min-h-[64px] flex-col justify-center gap-1 px-4 py-3"
           style={{
             borderTop: `2px solid ${
-              feedback?.tone === "accept" ? "var(--signal-cyan)" : feedback?.tone === "reject" ? "var(--signal-rose)" : "var(--signal-blue)"
+              feedback?.tone === "accept"
+                ? "var(--signal-cyan)"
+                : feedback?.tone === "reject"
+                  ? "var(--signal-rose)"
+                  : "var(--signal-blue)"
             }`,
             background: "color-mix(in srgb, var(--bg-panel) 70%, transparent)",
           }}
         >
           {feedback ? (
             <>
-              <div className="text-sm font-semibold" style={{ fontFamily: "var(--font-display-family)" }}>
+              <div
+                className="text-sm font-semibold"
+                style={{ fontFamily: "var(--font-display-family)" }}
+              >
                 {feedback.title}
               </div>
               <div className="text-xs" style={{ color: "var(--ink-muted)" }}>
@@ -440,15 +510,18 @@ export function Discovery({
           ) : (
             <div className="text-xs" style={{ color: "var(--ink-muted)" }}>
               <strong style={{ color: "var(--ink-primary)" }}>S</strong> add state ·{" "}
-              <strong style={{ color: "var(--ink-primary)" }}>T</strong> transition (click two states) ·{" "}
-              <strong style={{ color: "var(--ink-primary)" }}>V</strong> move · right-click a state for start/accepting/rename · double-click toggles accepting.
+              <strong style={{ color: "var(--ink-primary)" }}>T</strong> transition (click two
+              states) · <strong style={{ color: "var(--ink-primary)" }}>V</strong> move ·
+              right-click a state for start/accepting/rename · double-click toggles accepting.
               {attempts > 0 && ` · Attempts: ${attempts}`}
             </div>
           )}
         </div>
       </section>
 
-      {practiceOpen && <TimedPractice challenge={challenge} onClose={() => setPracticeOpen(false)} />}
+      {practiceOpen && (
+        <TimedPractice challenge={challenge} onClose={() => setPracticeOpen(false)} />
+      )}
       {creatorOpen && (
         <ChallengeCreator
           defaultAlphabet={alphabet}

@@ -5,15 +5,32 @@ import { useCanvasAttention } from "@/lib/tutor/useCanvasAttention";
 import { CanvasToolbar } from "@/components/CanvasToolbar";
 import { ChallengePicker } from "@/components/ChallengePicker";
 import { FIXED_CHALLENGES, type Challenge } from "@/lib/engine/challenges";
-import { findCounterexample, getTraceHint, type Counterexample, type TraceHint } from "@/lib/engine/algorithms";
+import {
+  findCounterexample,
+  getTraceHint,
+  type Counterexample,
+  type TraceHint,
+} from "@/lib/engine/algorithms";
 import { validateDFA } from "@/lib/engine/validate";
 import { Storage } from "@/lib/storage";
-import { dfaToMachine, layoutMachine, machineToDFA, starterMachine, useMachine } from "@/lib/machine";
+import {
+  dfaToMachine,
+  layoutMachine,
+  machineToDFA,
+  starterMachine,
+  useMachine,
+} from "@/lib/machine";
 import { useCanvasShortcuts } from "@/lib/useCanvasShortcuts";
 import { buildDebuggerContext } from "@/lib/tutor/context";
 import type { TutorAction } from "@/lib/tutor/actions";
 
-export function Debugger({ active, onContext }: { active: boolean; onContext: (ctx: () => string) => void }) {
+export function Debugger({
+  active,
+  onContext,
+}: {
+  active: boolean;
+  onContext: (ctx: () => string) => void;
+}) {
   const [challenge, setChallenge] = useState<Challenge>(FIXED_CHALLENGES[2]!);
   const [mode, setMode] = useState<CanvasMode>("pointer");
   const [ce, setCe] = useState<Counterexample | null>(null);
@@ -22,8 +39,13 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [highlights, setHighlights] = useState<Record<string, HighlightTone>>({});
-  const [result, setResult] = useState<{ tone: "accept" | "reject"; title: string; body: string } | null>(null);
-  const { machine, commit, set, replace, undo, redo, canUndo, canRedo } = useMachine(starterMachine());
+  const [result, setResult] = useState<{
+    tone: "accept" | "reject";
+    title: string;
+    body: string;
+  } | null>(null);
+  const { machine, commit, set, replace, undo, redo, canUndo, canRedo } =
+    useMachine(starterMachine());
   const attention = useCanvasAttention(active, () => commit((m) => layoutMachine(m)));
 
   const alphabet = challenge.alphabet;
@@ -74,7 +96,11 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
       setCe(null);
       setHint(null);
       Storage.recordSolve("debugger", challenge.id, 1);
-      setResult({ tone: "accept", title: "No counterexample exists", body: `Your machine decides "${challenge.name}" exactly. ` });
+      setResult({
+        tone: "accept",
+        title: "No counterexample exists",
+        body: `Your machine decides "${challenge.name}" exactly. `,
+      });
       toast.success("Machines are equivalent 🎉");
       return;
     }
@@ -82,7 +108,11 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
     setHintLevel(0);
     setStep(0);
     setHint(getTraceHint(challenge.dfa, dfa, found.string));
-    Storage.appendMistake(dfa.isComplete() ? "accept" : "crash", challenge.id, `ce ${found.string || "ε"}`);
+    Storage.appendMistake(
+      dfa.isComplete() ? "accept" : "crash",
+      challenge.id,
+      `ce ${found.string || "ε"}`,
+    );
     setResult({
       tone: "reject",
       title: `Counterexample "${found.string || "ε"}"`,
@@ -155,7 +185,13 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
               Debugger
             </span>
             <span className="badge">{challenge.difficulty}</span>
-            <button className="btn-ghost ml-auto" onClick={() => { Storage.saveToLibrary(challenge); toast("Saved to library"); }}>
+            <button
+              className="btn-ghost ml-auto"
+              onClick={() => {
+                Storage.saveToLibrary(challenge);
+                toast("Saved to library");
+              }}
+            >
               ☆ Save
             </button>
           </div>
@@ -171,7 +207,11 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
             <>
               <div className="flex flex-wrap gap-1">
                 {[...ce.string].map((c, i) => (
-                  <span key={i} className="tape-cell" data-state={i === step - 1 ? "current" : i < step - 1 ? "past" : "idle"}>
+                  <span
+                    key={i}
+                    className="tape-cell"
+                    data-state={i === step - 1 ? "current" : i < step - 1 ? "past" : "idle"}
+                  >
                     {c}
                   </span>
                 ))}
@@ -181,10 +221,17 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
                 <button className="tool-btn" onClick={() => setStep((s) => Math.max(0, s - 1))}>
                   ◀
                 </button>
-                <button className="tool-btn" onClick={() => setPlaying((p) => !p)} data-active={playing}>
+                <button
+                  className="tool-btn"
+                  onClick={() => setPlaying((p) => !p)}
+                  data-active={playing}
+                >
                   {playing ? "❙❙" : "▶"}
                 </button>
-                <button className="tool-btn" onClick={() => setStep((s) => Math.min(trace.trace.length - 1, s + 1))}>
+                <button
+                  className="tool-btn"
+                  onClick={() => setStep((s) => Math.min(trace.trace.length - 1, s + 1))}
+                >
                   ▶|
                 </button>
                 <span className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
@@ -210,7 +257,12 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
           <div className="section-label mb-2">Socratic hints</div>
           <div className="flex gap-2">
             {[1, 2, 3].map((l) => (
-              <button key={l} className="tool-btn" data-active={hintLevel >= l} onClick={() => showHint(l)}>
+              <button
+                key={l}
+                className="tool-btn"
+                data-active={hintLevel >= l}
+                onClick={() => showHint(l)}
+              >
                 L{l}
               </button>
             ))}
@@ -239,7 +291,11 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
           onLayout={() => commit((m) => layoutMachine(m))}
           alphabet={alphabet}
         >
-          <button className="btn-ghost" onClick={() => replace(layoutMachine(dfaToMachine(challenge.dfa)))} title="Load a scrambled reference to repair">
+          <button
+            className="btn-ghost"
+            onClick={() => replace(layoutMachine(dfaToMachine(challenge.dfa)))}
+            title="Load a scrambled reference to repair"
+          >
             Load reference
           </button>
           <button className="btn-primary" onClick={debugDFA}>
@@ -268,7 +324,10 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
         >
           {result ? (
             <>
-              <div className="flex items-center gap-2 text-sm font-semibold" style={{ fontFamily: "var(--font-display-family)" }}>
+              <div
+                className="flex items-center gap-2 text-sm font-semibold"
+                style={{ fontFamily: "var(--font-display-family)" }}
+              >
                 {result.title}
                 {ce && (
                   <>
@@ -287,7 +346,8 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
             </>
           ) : (
             <div className="text-xs" style={{ color: "var(--ink-muted)" }}>
-              Build a machine for this language, then let the lab find the shortest string where you disagree.
+              Build a machine for this language, then let the lab find the shortest string where you
+              disagree.
             </div>
           )}
         </div>

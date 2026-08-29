@@ -79,10 +79,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "IALE — Interactive Automata Lab" },
-      { name: "description", content: "An interactive lab for building, debugging and mutating finite automata." },
+      {
+        name: "description",
+        content: "An interactive lab for building, debugging and mutating finite automata.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "IALE — Interactive Automata Lab" },
-      { property: "og:description", content: "An interactive lab for building, debugging and mutating finite automata." },
+      {
+        property: "og:description",
+        content: "An interactive lab for building, debugging and mutating finite automata.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -115,7 +121,6 @@ function RootShell({ children }: { children: ReactNode }) {
     </html>
   );
 }
-
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

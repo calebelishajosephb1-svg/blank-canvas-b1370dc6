@@ -55,7 +55,10 @@ export function hasEpsilon(nfa: NFA): boolean {
 export function removeEpsilons(nfa: NFA): { nfa: NFA; steps: string[] } {
   const steps: string[] = [];
   if (!hasEpsilon(nfa)) {
-    return { nfa: new NFA(nfa), steps: ["input has no ε-edges — passed through unchanged (identity)"] };
+    return {
+      nfa: new NFA(nfa),
+      steps: ["input has no ε-edges — passed through unchanged (identity)"],
+    };
   }
   const transitions: Record<string, Record<string, string[]>> = {};
   const acceptStates: string[] = [];
@@ -207,7 +210,9 @@ export function nfaToRegex(nfa: NFA): { regex: string | null; steps: GNFAStep[] 
 
     for (const [i] of ins) {
       for (const [, j] of outs) {
-        const mid = self ? concat(concat(get(i, q)!, star(self)), get(q, j)!) : concat(get(i, q)!, get(q, j)!);
+        const mid = self
+          ? concat(concat(get(i, q)!, star(self)), get(q, j)!)
+          : concat(get(i, q)!, get(q, j)!);
         set(i, j, union(get(i, j), mid));
       }
     }
@@ -230,7 +235,8 @@ export function verifyRegexAgainstDfa(
 ): { equivalent: boolean; counterexample: Counterexample | null; error?: string } {
   const alphabet = original.alphabet.filter((s) => s !== EPS);
   const built = regexToDFA(regex, alphabet);
-  if (!built) return { equivalent: false, counterexample: null, error: "Result did not parse as a regex." };
+  if (!built)
+    return { equivalent: false, counterexample: null, error: "Result did not parse as a regex." };
   const cex = findCounterexample(original, built);
   return { equivalent: !cex, counterexample: cex };
 }
@@ -255,7 +261,8 @@ export function nfaToMachine(nfa: NFA): Machine {
       for (const to of tos ?? []) {
         if (!states.some((s) => s.label === to)) continue;
         const k = `${from}->${to}`;
-        if (!edges.has(k)) edges.set(k, { id: `e${++n}`, from: idOf(from), to: idOf(to), symbols: [] });
+        if (!edges.has(k))
+          edges.set(k, { id: `e${++n}`, from: idOf(from), to: idOf(to), symbols: [] });
         const e = edges.get(k)!;
         if (!e.symbols.includes(sym)) e.symbols.push(sym);
       }

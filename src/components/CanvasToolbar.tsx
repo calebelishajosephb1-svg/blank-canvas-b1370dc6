@@ -1,5 +1,14 @@
 import type { ComponentType, ReactNode } from "react";
-import { Circle, Eraser, LayoutGrid, MousePointer2, Redo2, Spline, Trash2, Undo2 } from "lucide-react";
+import {
+  Circle,
+  Eraser,
+  LayoutGrid,
+  MousePointer2,
+  Redo2,
+  Spline,
+  Trash2,
+  Undo2,
+} from "lucide-react";
 import type { CanvasMode } from "./DFACanvas";
 
 const MODES: { mode: CanvasMode; icon: ComponentType<{ size?: number }>; title: string }[] = [
@@ -50,22 +59,44 @@ export function CanvasToolbar({
       </div>
       <span className="mx-1 h-5 w-px" style={{ background: "var(--border-subtle)" }} />
       {onUndo && (
-        <button className="tool-btn" onClick={onUndo} disabled={!canUndo} title="Undo" aria-label="Undo">
+        <button
+          className="tool-btn"
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="Undo"
+          aria-label="Undo"
+        >
           <Undo2 size={15} />
         </button>
       )}
       {onRedo && (
-        <button className="tool-btn" onClick={onRedo} disabled={!canRedo} title="Redo" aria-label="Redo">
+        <button
+          className="tool-btn"
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="Redo"
+          aria-label="Redo"
+        >
           <Redo2 size={15} />
         </button>
       )}
       {onClear && (
-        <button className="tool-btn" onClick={onClear} title="Clear canvas" aria-label="Clear canvas">
+        <button
+          className="tool-btn"
+          onClick={onClear}
+          title="Clear canvas"
+          aria-label="Clear canvas"
+        >
           <Trash2 size={15} />
         </button>
       )}
       {onLayout && (
-        <button className="tool-btn" onClick={onLayout} title="Auto layout" aria-label="Auto layout">
+        <button
+          className="tool-btn"
+          onClick={onLayout}
+          title="Auto layout"
+          aria-label="Auto layout"
+        >
           <LayoutGrid size={15} />
         </button>
       )}

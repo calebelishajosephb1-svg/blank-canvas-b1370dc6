@@ -9,7 +9,10 @@ export interface SharePayload {
 }
 
 const toB64Url = (json: string) =>
-  btoa(unescape(encodeURIComponent(json))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  btoa(unescape(encodeURIComponent(json)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 
 const fromB64Url = (b64: string) =>
   decodeURIComponent(escape(atob(b64.replace(/-/g, "+").replace(/_/g, "/"))));

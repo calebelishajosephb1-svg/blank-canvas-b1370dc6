@@ -55,7 +55,9 @@ export function minimize(input: DFA): DFA {
     for (const group of groups) {
       const buckets = new Map<string, string[]>();
       for (const s of group) {
-        const sig = dfa.alphabet.map((sym) => indexOf.get(dfa.transition(s, sym) ?? "") ?? -1).join("|");
+        const sig = dfa.alphabet
+          .map((sym) => indexOf.get(dfa.transition(s, sym) ?? "") ?? -1)
+          .join("|");
         if (!buckets.has(sig)) buckets.set(sig, []);
         buckets.get(sig)!.push(s);
       }
@@ -218,15 +220,19 @@ export function getTraceHint(ref: DFA, student: DFA, wrongStr: string): TraceHin
 
 const MISCONCEPTION_TEXT: Record<string, string> = {
   sink: "You often forget the trap/sink state: once a string is doomed, the machine still needs somewhere to live for every remaining symbol.",
-  accept: "Accepting status keeps slipping: a state is accepting because *ending* there means success, not because it is reachable.",
-  transition: "Transitions are the recurring gap: every state needs exactly one edge per alphabet symbol.",
-  crash: "Your machines tend to crash mid-string — that's a missing transition, and a crash counts as reject.",
+  accept:
+    "Accepting status keeps slipping: a state is accepting because *ending* there means success, not because it is reachable.",
+  transition:
+    "Transitions are the recurring gap: every state needs exactly one edge per alphabet symbol.",
+  crash:
+    "Your machines tend to crash mid-string — that's a missing transition, and a crash counts as reject.",
 };
 
 export function detectMisconceptions(history: { category: string }[]): string[] {
   const counts = new Map<string, number>();
   for (const h of history) counts.set(h.category, (counts.get(h.category) ?? 0) + 1);
   const out: string[] = [];
-  for (const [cat, n] of counts) if (n >= 2 && MISCONCEPTION_TEXT[cat]) out.push(MISCONCEPTION_TEXT[cat]);
+  for (const [cat, n] of counts)
+    if (n >= 2 && MISCONCEPTION_TEXT[cat]) out.push(MISCONCEPTION_TEXT[cat]);
   return out;
 }

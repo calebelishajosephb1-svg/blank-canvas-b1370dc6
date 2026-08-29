@@ -109,7 +109,8 @@ export function dfaToMachine(dfa: DFA, positions?: PositionMap): Machine {
     for (const [sym, to] of Object.entries(row)) {
       if (!states.some((s) => s.label === to)) continue;
       const key = `${from}->${to}`;
-      if (!edges.has(key)) edges.set(key, { id: `t${++n}`, from: idOf(from), to: idOf(to), symbols: [] });
+      if (!edges.has(key))
+        edges.set(key, { id: `t${++n}`, from: idOf(from), to: idOf(to), symbols: [] });
       const edge = edges.get(key)!;
       if (!edge.symbols.includes(sym)) edge.symbols.push(sym);
     }
@@ -140,7 +141,9 @@ export function useMachine(initial: Machine = starterMachine()) {
 
   /** Update without creating a history entry (e.g. every frame of a drag). */
   const set = useCallback((next: Machine | ((prev: Machine) => Machine)) => {
-    setMachine((prev) => (typeof next === "function" ? (next as (p: Machine) => Machine)(prev) : next));
+    setMachine((prev) =>
+      typeof next === "function" ? (next as (p: Machine) => Machine)(prev) : next,
+    );
   }, []);
 
   const replace = useCallback((next: Machine) => {

@@ -9,7 +9,12 @@
 
 export type TutorAction =
   | { type: "highlight"; state: string; color: "blue" | "rose" | "cyan" | "amber" }
-  | { type: "highlightTransition"; from: string; to: string; color: "blue" | "rose" | "cyan" | "amber" }
+  | {
+      type: "highlightTransition";
+      from: string;
+      to: string;
+      color: "blue" | "rose" | "cyan" | "amber";
+    }
   | { type: "annotateState"; state: string }
   | { type: "isolateSymbol"; symbol: string }
   | { type: "zoomTo"; state: string }
@@ -33,7 +38,8 @@ export type TutorAction =
 const TAG = /<IALE_([A-Z_]+)([^>]*)\/>/g;
 const TONES = ["blue", "rose", "cyan", "amber"] as const;
 type Tone = (typeof TONES)[number];
-const tone = (v?: string): Tone => (v && (TONES as readonly string[]).includes(v) ? (v as Tone) : "blue");
+const tone = (v?: string): Tone =>
+  v && (TONES as readonly string[]).includes(v) ? (v as Tone) : "blue";
 
 function attrs(src: string): Record<string, string> {
   const out: Record<string, string> = {};
@@ -45,30 +51,46 @@ type Builder = (a: Record<string, string>) => TutorAction | null;
 
 /** Tag name -> action builder. Returning null drops a malformed tag silently. */
 export const ACTION_REGISTRY: Record<string, Builder> = {
-  HIGHLIGHT_STATE: (a) => (a["state"] ? { type: "highlight", state: a["state"], color: tone(a["color"]) } : null),
+  HIGHLIGHT_STATE: (a) =>
+    a["state"] ? { type: "highlight", state: a["state"], color: tone(a["color"]) } : null,
   HIGHLIGHT_TRANSITION: (a) =>
-    a["from"] && a["to"] ? { type: "highlightTransition", from: a["from"], to: a["to"], color: tone(a["color"]) } : null,
+    a["from"] && a["to"]
+      ? { type: "highlightTransition", from: a["from"], to: a["to"], color: tone(a["color"]) }
+      : null,
   ANNOTATE_STATE: (a) => (a["state"] ? { type: "annotateState", state: a["state"] } : null),
   ISOLATE_SYMBOL: (a) => (a["symbol"] ? { type: "isolateSymbol", symbol: a["symbol"] } : null),
   ZOOM_TO: (a) => (a["state"] ? { type: "zoomTo", state: a["state"] } : null),
   SIMPLIFY_LAYOUT: () => ({ type: "simplifyLayout" }),
-  LINK_CONCEPT: (a) => (a["tab"] ? { type: "linkConcept", tab: a["tab"], label: a["label"] || `Open ${a["tab"]}` } : null),
+  LINK_CONCEPT: (a) =>
+    a["tab"]
+      ? { type: "linkConcept", tab: a["tab"], label: a["label"] || `Open ${a["tab"]}` }
+      : null,
   TEST_STRING: (a) => (a["value"] !== undefined ? { type: "test", value: a["value"] } : null),
   ANIMATE_TRACE: (a) => (a["value"] !== undefined ? { type: "animate", value: a["value"] } : null),
-  ANIMATE_ELIMINATION: (a) => (a["state"] ? { type: "animateElimination", state: a["state"] } : null),
+  ANIMATE_ELIMINATION: (a) =>
+    a["state"] ? { type: "animateElimination", state: a["state"] } : null,
   ANIMATE_SUBSET_STEP: (a) => (a["set"] ? { type: "animateSubsetStep", set: a["set"] } : null),
-  SET_HINT_LEVEL: (a) => ({ type: "hintLevel", level: Math.min(3, Math.max(1, Number(a["level"]) || 1)) }),
-  ADJUST_DIFFICULTY: (a) => ({ type: "adjustDifficulty", direction: a["direction"] === "down" ? "down" : "up" }),
+  SET_HINT_LEVEL: (a) => ({
+    type: "hintLevel",
+    level: Math.min(3, Math.max(1, Number(a["level"]) || 1)),
+  }),
+  ADJUST_DIFFICULTY: (a) => ({
+    type: "adjustDifficulty",
+    direction: a["direction"] === "down" ? "down" : "up",
+  }),
   STREAK_NUDGE: () => ({ type: "streakNudge" }),
   CELEBRATE: () => ({ type: "celebrate" }),
   GOTO_TAB: (a) => (a["tab"] ? { type: "gotoTab", tab: a["tab"] } : null),
   SHOW_EXAMPLE: (a) =>
-    a["str"] !== undefined ? { type: "showExample", str: a["str"], accept: a["accept"] !== "false" } : null,
+    a["str"] !== undefined
+      ? { type: "showExample", str: a["str"], accept: a["accept"] !== "false" }
+      : null,
   READ_ALOUD_SUMMARY: (a) => (a["text"] ? { type: "readAloud", text: a["text"] } : null),
   EXPORT_SESSION_NOTES: () => ({ type: "exportNotes" }),
   // Scratch sketch: illustrative dummy machine only (tier: PUBLIC by
   // construction — it never receives the student's real machine).
-  SKETCH: (a) => (a["spec"] ? { type: "sketch", title: a["title"] || "generic example", spec: a["spec"] } : null),
+  SKETCH: (a) =>
+    a["spec"] ? { type: "sketch", title: a["title"] || "generic example", spec: a["spec"] } : null,
   CHALLENGE: (a) =>
     a["regex"]
       ? {
@@ -97,7 +119,15 @@ export function parseTutorActions(text: string): { cleanText: string; actions: T
   // the two-tool budget, since they never carry content.
   const firstChallenge = actions.findIndex((x) => x.type === "challenge");
   const filtered = actions.filter((x, i) => x.type !== "challenge" || i === firstChallenge);
-  const cosmetic = new Set(["annotateState", "isolateSymbol", "zoomTo", "simplifyLayout", "linkConcept", "readAloud", "sketch"]);
+  const cosmetic = new Set([
+    "annotateState",
+    "isolateSymbol",
+    "zoomTo",
+    "simplifyLayout",
+    "linkConcept",
+    "readAloud",
+    "sketch",
+  ]);
   const budgeted: TutorAction[] = [];
   let spent = 0;
   for (const a of filtered) {

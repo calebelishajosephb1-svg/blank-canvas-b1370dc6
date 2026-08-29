@@ -18,10 +18,14 @@ export interface CanvasAttention {
   clear: () => void;
 }
 
-export function useCanvasAttention(active: boolean, onSimplifyLayout?: () => void): CanvasAttention {
+export function useCanvasAttention(
+  active: boolean,
+  onSimplifyLayout?: () => void,
+): CanvasAttention {
   const [isolateSymbol, setIsolate] = useState<string | null>(null);
   const [annotations, setAnnotations] = useState<string[]>([]);
-  const [highlightTransition, setHighlightTransition] = useState<CanvasAttention["highlightTransition"]>(null);
+  const [highlightTransition, setHighlightTransition] =
+    useState<CanvasAttention["highlightTransition"]>(null);
 
   useEffect(() => {
     if (!active) return;

@@ -57,7 +57,12 @@ class Builder {
   }
 
   concat(a: Frag, b: Frag): Frag {
-    const f: Frag = { start: a.start, accept: b.accept, trans: this.merge(a, b), states: [...a.states, ...b.states] };
+    const f: Frag = {
+      start: a.start,
+      accept: b.accept,
+      trans: this.merge(a, b),
+      states: [...a.states, ...b.states],
+    };
     this.add(f, a.accept, EPS, b.start);
     return f;
   }
@@ -65,7 +70,12 @@ class Builder {
   union(a: Frag, b: Frag): Frag {
     const s = this.id();
     const acc = this.id();
-    const f: Frag = { start: s, accept: acc, trans: this.merge(a, b), states: [...a.states, ...b.states, s, acc] };
+    const f: Frag = {
+      start: s,
+      accept: acc,
+      trans: this.merge(a, b),
+      states: [...a.states, ...b.states, s, acc],
+    };
     this.add(f, s, EPS, a.start);
     this.add(f, s, EPS, b.start);
     this.add(f, a.accept, EPS, acc);
@@ -76,7 +86,12 @@ class Builder {
   star(a: Frag): Frag {
     const s = this.id();
     const acc = this.id();
-    const f: Frag = { start: s, accept: acc, trans: JSON.parse(JSON.stringify(a.trans)), states: [...a.states, s, acc] };
+    const f: Frag = {
+      start: s,
+      accept: acc,
+      trans: JSON.parse(JSON.stringify(a.trans)),
+      states: [...a.states, s, acc],
+    };
     this.add(f, s, EPS, a.start);
     this.add(f, s, EPS, acc);
     this.add(f, a.accept, EPS, a.start);
@@ -91,7 +106,12 @@ class Builder {
   plus(a: Frag): Frag {
     const s = this.id();
     const acc = this.id();
-    const f: Frag = { start: s, accept: acc, trans: JSON.parse(JSON.stringify(a.trans)), states: [...a.states, s, acc] };
+    const f: Frag = {
+      start: s,
+      accept: acc,
+      trans: JSON.parse(JSON.stringify(a.trans)),
+      states: [...a.states, s, acc],
+    };
     this.add(f, s, EPS, a.start);
     this.add(f, a.accept, EPS, a.start);
     this.add(f, a.accept, EPS, acc);
@@ -210,12 +230,15 @@ class Parser {
       if (this.peek() === "-" && lookahead && lookahead !== "]") {
         this.i++;
         const end = this.src[this.i++] ?? c;
-        for (let k = c.charCodeAt(0); k <= end.charCodeAt(0); k++) chars.push(String.fromCharCode(k));
+        for (let k = c.charCodeAt(0); k <= end.charCodeAt(0); k++)
+          chars.push(String.fromCharCode(k));
       } else chars.push(c);
     }
     if (this.peek() !== "]") throw new Error("Missing closing ]");
     this.i++;
-    const set = negate ? this.b.alphabet.filter((s) => !chars.includes(s)) : chars.filter((c) => this.b.alphabet.includes(c));
+    const set = negate
+      ? this.b.alphabet.filter((s) => !chars.includes(s))
+      : chars.filter((c) => this.b.alphabet.includes(c));
     return this.unionOf(set);
   }
 }
@@ -234,7 +257,10 @@ export function regexToDFA(regex: string, alphabet: string[]): DFA | null {
   }
 }
 
-export function validateRegex(regex: string, alphabet: string[]): { valid: boolean; error?: string } {
+export function validateRegex(
+  regex: string,
+  alphabet: string[],
+): { valid: boolean; error?: string } {
   if (!regex || !regex.trim()) return { valid: false, error: "Pattern is empty." };
   try {
     regexToNFA(regex, alphabet);

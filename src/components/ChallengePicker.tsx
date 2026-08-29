@@ -8,18 +8,25 @@ export function ChallengePicker({
   activeId,
   onPick,
   extra,
+  maskNames = false,
 }: {
   activeId: string | null;
   onPick: (c: Challenge) => void;
   extra?: Challenge[];
+  /** Discovery mode: never spoil the name of a language the learner hasn't solved yet. */
+  maskNames?: boolean;
 }) {
   const [open, setOpen] = useState<string | null>("Easy");
   const [ai, setAi] = useState<Challenge[]>([]);
   const [library, setLibrary] = useState<Challenge[]>([]);
+  const [solvedIds, setSolvedIds] = useState<Set<string>>(new Set());
 
   const refresh = () => {
     setAi(Storage.getAIChallenges());
     setLibrary(Storage.getLibrary());
+    setSolvedIds(
+      new Set(Object.keys(Storage.getStats().solves).map((k) => k.split(":").slice(1).join(":"))),
+    );
   };
 
   useEffect(() => {
@@ -28,15 +35,21 @@ export function ChallengePicker({
     window.addEventListener("iale-ai-challenge-updated", handler);
     window.addEventListener("iale-library-updated", handler);
     window.addEventListener("iale-data-cleared", handler);
+    window.addEventListener("iale-stats-updated", handler);
     return () => {
       window.removeEventListener("iale-ai-challenge-updated", handler);
       window.removeEventListener("iale-library-updated", handler);
       window.removeEventListener("iale-data-cleared", handler);
+      window.removeEventListener("iale-stats-updated", handler);
     };
   }, []);
 
   const sections: { key: string; label: string; items: Challenge[] }[] = [
-    ...GROUPS.map((g) => ({ key: g, label: g, items: FIXED_CHALLENGES.filter((c) => c.difficulty === g) })),
+    ...GROUPS.map((g) => ({
+      key: g,
+      label: g,
+      items: FIXED_CHALLENGES.filter((c) => c.difficulty === g),
+    })),
     { key: "custom", label: "Custom / generated", items: extra ?? [] },
     { key: "library", label: `Library ${library.length}`, items: library },
   ];
@@ -45,7 +58,11 @@ export function ChallengePicker({
     <div className="flex flex-col gap-2">
       <div className="section-label">All challenges</div>
       {sections.map((s) => (
-        <div key={s.key} className="overflow-hidden rounded-xl border" style={{ borderColor: "var(--border-subtle)" }}>
+        <div
+          key={s.key}
+          className="overflow-hidden rounded-xl border"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
           <button
             className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold"
             onClick={() => setOpen((o) => (o === s.key ? null : s.key))}
@@ -56,19 +73,27 @@ export function ChallengePicker({
           </button>
           {open === s.key && (
             <div className="flex flex-col">
-              {!s.items.length && <div className="px-3 py-2 text-xs" style={{ color: "var(--ink-disabled)" }}>Nothing here yet.</div>}
-              {s.items.map((c) => (
+              {!s.items.length && (
+                <div className="px-3 py-2 text-xs" style={{ color: "var(--ink-disabled)" }}>
+                  Nothing here yet.
+                </div>
+              )}
+              {s.items.map((c, i) => {
+                const hidden = maskNames && !solvedIds.has(c.id);
+                return (
                 <div key={c.id} className="flex items-center gap-1 px-2 py-1">
                   <button
                     className="flex-1 truncate rounded-lg px-2 py-1.5 text-left text-xs transition-colors"
                     onClick={() => onPick(c)}
+                    title={hidden ? "Hidden until you solve it" : c.name}
                     style={{
                       background: activeId === c.id ? "var(--signal-blue-15)" : "transparent",
                       color: activeId === c.id ? "var(--ink-primary)" : "var(--ink-muted)",
+                      fontFamily: hidden ? "var(--font-mono, monospace)" : undefined,
                     }}
                   >
                     {activeId === c.id ? "● " : ""}
-                    {c.name}
+                    {hidden ? `${s.label} #${i + 1} · locked` : c.name}
                   </button>
                   <button
                     className="tool-btn"
@@ -82,7 +107,8 @@ export function ChallengePicker({
                     {Storage.isInLibrary(c.id) ? "✓" : "☆"}
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -26,7 +26,14 @@ export function ChallengeCreator({
   const [error, setError] = useState<string | null>(null);
 
   const build = () => {
-    const alphabet = [...new Set(alphabetRaw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean))];
+    const alphabet = [
+      ...new Set(
+        alphabetRaw
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ),
+    ];
     if (!alphabet.length) {
       setError("Give at least one alphabet symbol.");
       return;
@@ -65,7 +72,12 @@ export function ChallengeCreator({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${built.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "challenge"}.json`;
+    a.download = `${
+      built.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "challenge"
+    }.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -82,7 +94,11 @@ export function ChallengeCreator({
     >
       <div
         className="w-full max-w-[700px] rounded-2xl border p-5"
-        style={{ background: "var(--bg-panel)", borderColor: "var(--border-strong)", boxShadow: "var(--shadow-panel)" }}
+        style={{
+          background: "var(--bg-panel)",
+          borderColor: "var(--border-strong)",
+          boxShadow: "var(--shadow-panel)",
+        }}
       >
         <div className="flex items-center gap-2">
           <Wrench size={16} style={{ color: "var(--signal-blue)" }} />
@@ -96,11 +112,20 @@ export function ChallengeCreator({
           <div className="flex flex-col gap-3">
             <div>
               <label className="section-label">Name</label>
-              <input className="field-input" placeholder="Ends with 01" value={name} onChange={(e) => setName(e.target.value)} />
+              <input
+                className="field-input"
+                placeholder="Ends with 01"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <div>
               <label className="section-label">Difficulty</label>
-              <select className="field-input" value={difficulty} onChange={(e) => setDifficulty(e.target.value as Difficulty)}>
+              <select
+                className="field-input"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+              >
                 <option>Easy</option>
                 <option>Medium</option>
                 <option>Hard</option>
@@ -108,7 +133,11 @@ export function ChallengeCreator({
             </div>
             <div>
               <label className="section-label">Alphabet (comma-separated)</label>
-              <input className="field-input" value={alphabetRaw} onChange={(e) => setAlphabetRaw(e.target.value)} />
+              <input
+                className="field-input"
+                value={alphabetRaw}
+                onChange={(e) => setAlphabetRaw(e.target.value)}
+              />
             </div>
             <div>
               <label className="section-label">Hidden language (regex)</label>
@@ -130,7 +159,10 @@ export function ChallengeCreator({
             )}
           </div>
 
-          <div className="rounded-xl border p-3" style={{ borderColor: "var(--border-subtle)", background: "var(--bg-panel-raised)" }}>
+          <div
+            className="rounded-xl border p-3"
+            style={{ borderColor: "var(--border-subtle)", background: "var(--bg-panel-raised)" }}
+          >
             <div className="section-label mb-2">Preview</div>
             {!built ? (
               <p className="text-xs" style={{ color: "var(--ink-disabled)" }}>

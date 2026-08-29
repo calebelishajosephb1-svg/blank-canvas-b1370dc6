@@ -54,7 +54,9 @@ export class NFA {
     const steps: string[] = [];
     const start = this.epsilonClosure(this.startStates);
     const startKey = NFA.setKey(start);
-    steps.push(`start: ε-closure({${[...this.startStates].join(",")}}) = {${[...start].join(",")}}`);
+    steps.push(
+      `start: ε-closure({${[...this.startStates].join(",")}}) = {${[...start].join(",")}}`,
+    );
     const states: string[] = [startKey];
     const transitions: TransitionMap = {};
     const acceptStates: string[] = [];
@@ -70,7 +72,9 @@ export class NFA {
         const closure = this.epsilonClosure(moved);
         const nk = NFA.setKey(closure);
         transitions[key][sym] = nk;
-        steps.push(`δ({${[...set].join(",")}}, ${sym}) = ε-closure({${[...moved].join(",")}}) = {${[...closure].join(",")}}`);
+        steps.push(
+          `δ({${[...set].join(",")}}, ${sym}) = ε-closure({${[...moved].join(",")}}) = {${[...closure].join(",")}}`,
+        );
         if (!sets.has(nk)) {
           sets.set(nk, closure);
           states.push(nk);
@@ -80,7 +84,13 @@ export class NFA {
     }
     steps.push(`done: ${states.length} DFA states`);
     return {
-      dfa: new DFA({ states, alphabet: this.alphabet, transitions, startState: startKey, acceptStates }),
+      dfa: new DFA({
+        states,
+        alphabet: this.alphabet,
+        transitions,
+        startState: startKey,
+        acceptStates,
+      }),
       steps,
     };
   }

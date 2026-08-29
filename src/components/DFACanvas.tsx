@@ -75,13 +75,21 @@ function edgeGeometry(a: MachineState, b: MachineState, curved: boolean) {
   const ey = b.y - uy * (STATE_R + 9);
   if (!curved) {
     // Label sits ON the line (the paint-order halo punches a gap through it).
-    return { path: `M ${sx} ${sy} L ${ex} ${ey}`, labelX: (sx + ex) / 2, labelY: (sy + ey) / 2 + 4.5 };
+    return {
+      path: `M ${sx} ${sy} L ${ex} ${ey}`,
+      labelX: (sx + ex) / 2,
+      labelY: (sy + ey) / 2 + 4.5,
+    };
   }
   const bend = 42;
   const mx = (sx + ex) / 2 - uy * bend;
   const my = (sy + ey) / 2 + ux * bend;
   // Quadratic midpoint = average of endpoints and control point — again, on the curve.
-  return { path: `M ${sx} ${sy} Q ${mx} ${my} ${ex} ${ey}`, labelX: (sx + ex + 2 * mx) / 4, labelY: (sy + ey + 2 * my) / 4 + 4.5 };
+  return {
+    path: `M ${sx} ${sy} Q ${mx} ${my} ${ex} ${ey}`,
+    labelX: (sx + ex + 2 * mx) / 4,
+    labelY: (sy + ey + 2 * my) / 4 + 4.5,
+  };
 }
 
 export function DFACanvas({
@@ -203,7 +211,8 @@ export function DFACanvas({
   }, [mode, editable]);
 
   const hitState = useCallback(
-    (x: number, y: number) => machine.states.find((s) => Math.hypot(s.x - x, s.y - y) <= STATE_R + 4) ?? null,
+    (x: number, y: number) =>
+      machine.states.find((s) => Math.hypot(s.x - x, s.y - y) <= STATE_R + 4) ?? null,
     [machine.states],
   );
 
@@ -215,7 +224,9 @@ export function DFACanvas({
         const a = machine.states.find((s) => s.id === t.from);
         const b = machine.states.find((s) => s.id === t.to);
         if (!a || !b) continue;
-        const curved = machine.transitions.some((o) => o.from === t.to && o.to === t.from && o.id !== t.id);
+        const curved = machine.transitions.some(
+          (o) => o.from === t.to && o.to === t.from && o.id !== t.id,
+        );
         const g = edgeGeometry(a, b, curved);
         let d = Math.hypot(g.labelX - x, g.labelY - y);
         if (a.id !== b.id) {
@@ -325,7 +336,8 @@ export function DFACanvas({
         setGhost({ x, y });
         return;
       }
-      const existing = machine.transitions.find((t) => t.from === transFrom && t.to === hit.id) ?? null;
+      const existing =
+        machine.transitions.find((t) => t.from === transFrom && t.to === hit.id) ?? null;
       setPending({
         from: transFrom,
         to: hit.id,
@@ -403,7 +415,16 @@ export function DFACanvas({
   };
 
   const toggleSymbol = (sym: string) => {
-    setPending((p) => (p ? { ...p, symbols: p.symbols.includes(sym) ? p.symbols.filter((s) => s !== sym) : [...p.symbols, sym] } : p));
+    setPending((p) =>
+      p
+        ? {
+            ...p,
+            symbols: p.symbols.includes(sym)
+              ? p.symbols.filter((s) => s !== sym)
+              : [...p.symbols, sym],
+          }
+        : p,
+    );
   };
 
   useEffect(() => {
@@ -428,7 +449,11 @@ export function DFACanvas({
   }, [selected, selectedEdge, editable, deleteTransition]);
 
   const byId = (id: string) => machine.states.find((s) => s.id === id);
-  const existingEdges = machine.transitions.map((t) => ({ from: t.from, to: t.to, symbols: t.symbols }));
+  const existingEdges = machine.transitions.map((t) => ({
+    from: t.from,
+    to: t.to,
+    symbols: t.symbols,
+  }));
 
   return (
     <div className="canvas-surface" onContextMenu={(e) => e.preventDefault()}>
@@ -438,7 +463,15 @@ export function DFACanvas({
         preserveAspectRatio="xMidYMid meet"
         className="h-full w-full touch-none select-none"
         style={{
-          cursor: panning ? "grabbing" : mode === "state" ? "copy" : mode === "delete" ? "not-allowed" : mode === "transition" ? "crosshair" : "default",
+          cursor: panning
+            ? "grabbing"
+            : mode === "state"
+              ? "copy"
+              : mode === "delete"
+                ? "not-allowed"
+                : mode === "transition"
+                  ? "crosshair"
+                  : "default",
         }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -448,7 +481,13 @@ export function DFACanvas({
           if (!editable) return;
           const { x, y } = toLocal(e);
           const hit = hitState(x, y);
-          if (hit) onChange?.((prev) => ({ ...prev, states: prev.states.map((s) => (s.id === hit.id ? { ...s, isAccepting: !s.isAccepting } : s)) }));
+          if (hit)
+            onChange?.((prev) => ({
+              ...prev,
+              states: prev.states.map((s) =>
+                s.id === hit.id ? { ...s, isAccepting: !s.isAccepting } : s,
+              ),
+            }));
           else addStateAt(x, y);
         }}
         onContextMenu={(e) => {
@@ -463,10 +502,26 @@ export function DFACanvas({
           <pattern id="lab-grid" width="24" height="24" patternUnits="userSpaceOnUse">
             <circle cx="1.2" cy="1.2" r="1.2" fill="var(--grid-line)" />
           </pattern>
-          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker
+            id="arr"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border-strong)" />
           </marker>
-          <marker id="arr-hl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker
+            id="arr-hl"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--signal-blue)" />
           </marker>
           <filter id="state-glow" x="-60%" y="-60%" width="220%" height="220%">
@@ -481,134 +536,200 @@ export function DFACanvas({
         <rect width={CANVAS_W} height={CANVAS_H} fill="url(#lab-grid)" />
 
         <g ref={worldRef} transform={`translate(${view.x} ${view.y}) scale(${view.zoom})`}>
-        {mode === "transition" && transFrom && ghost && byId(transFrom) && (
-          <line
-            x1={byId(transFrom)!.x}
-            y1={byId(transFrom)!.y}
-            x2={ghost.x}
-            y2={ghost.y}
-            stroke="var(--signal-blue)"
-            strokeWidth="2"
-            strokeDasharray="6 5"
-            opacity="0.8"
-          />
-        )}
+          {mode === "transition" && transFrom && ghost && byId(transFrom) && (
+            <line
+              x1={byId(transFrom)!.x}
+              y1={byId(transFrom)!.y}
+              x2={ghost.x}
+              y2={ghost.y}
+              stroke="var(--signal-blue)"
+              strokeWidth="2"
+              strokeDasharray="6 5"
+              opacity="0.8"
+            />
+          )}
 
-        {machine.transitions.map((t) => {
-          const a = byId(t.from);
-          const b = byId(t.to);
-          if (!a || !b) return null;
-          const hasReverse = machine.transitions.some((o) => o.from === t.to && o.to === t.from && o.id !== t.id);
-          const g = edgeGeometry(a, b, hasReverse);
-          const active =
-            (activeTransition && a.label === activeTransition.from && b.label === activeTransition.to) ||
-            (highlightTransition && a.label === highlightTransition.from && b.label === highlightTransition.to);
-          const isSelEdge = selectedEdge === t.id;
-          const dimmed = !!isolateSymbol && !t.symbols.includes(isolateSymbol);
-          const tone = active
-            ? highlightTransition?.color
-              ? TONE_VAR[highlightTransition.color]
-              : "var(--signal-blue)"
-            : isSelEdge
-              ? "var(--signal-amber)"
-              : "var(--border-strong)";
-          return (
-            <g key={t.id} opacity={dimmed ? 0.18 : 1}>
-              <path
-                d={g.path}
-                fill="none"
-                stroke={tone}
-                strokeWidth={active || isSelEdge ? 3 : 2}
-                markerEnd={active ? "url(#arr-hl)" : "url(#arr)"}
-                opacity={active ? 1 : 0.85}
-              />
-              <text
-                x={g.labelX}
-                y={g.labelY}
-                textAnchor="middle"
-                fontFamily="var(--font-mono-family)"
-                fontSize="13"
-                fill={active ? "var(--signal-blue)" : isSelEdge ? "var(--signal-amber)" : "var(--ink-primary)"}
-                style={{ paintOrder: "stroke", stroke: "var(--bg-canvas)", strokeWidth: 6 }}
-              >
-                {isolateSymbol ? t.symbols.filter((s) => s === isolateSymbol).join(",") || t.symbols.join(",") : t.symbols.join(",")}
-              </text>
-              {isSelEdge && editable && (
-                <text x={g.labelX} y={g.labelY + 16} textAnchor="middle" fontSize="9.5" fill="var(--signal-amber)">
-                  press Delete to remove
-                </text>
-              )}
-            </g>
-          );
-        })}
-
-        {machine.states.map((s) => {
-          const tone = highlights[s.label];
-          const isSel = selected === s.id || transFrom === s.id;
-          const confirming = confirmDelete === s.id;
-          const stroke = confirming
-            ? "var(--signal-amber)"
-            : tone
-              ? TONE_VAR[tone]
-              : isSel
-                ? "var(--signal-blue)"
+          {machine.transitions.map((t) => {
+            const a = byId(t.from);
+            const b = byId(t.to);
+            if (!a || !b) return null;
+            const hasReverse = machine.transitions.some(
+              (o) => o.from === t.to && o.to === t.from && o.id !== t.id,
+            );
+            const g = edgeGeometry(a, b, hasReverse);
+            const active =
+              (activeTransition &&
+                a.label === activeTransition.from &&
+                b.label === activeTransition.to) ||
+              (highlightTransition &&
+                a.label === highlightTransition.from &&
+                b.label === highlightTransition.to);
+            const isSelEdge = selectedEdge === t.id;
+            const dimmed = !!isolateSymbol && !t.symbols.includes(isolateSymbol);
+            const tone = active
+              ? highlightTransition?.color
+                ? TONE_VAR[highlightTransition.color]
+                : "var(--signal-blue)"
+              : isSelEdge
+                ? "var(--signal-amber)"
                 : "var(--border-strong)";
-          return (
-            <g key={s.id} style={{ cursor: editable && mode === "pointer" ? (dragging === s.id ? "grabbing" : "grab") : "inherit" }}>
-              {s.isStart && (
+            return (
+              <g key={t.id} opacity={dimmed ? 0.18 : 1}>
                 <path
-                  d={`M ${s.x - STATE_R - 30} ${s.y} L ${s.x - STATE_R - 5} ${s.y}`}
-                  stroke="var(--signal-blue)"
-                  strokeWidth="2.5"
-                  markerEnd="url(#arr-hl)"
+                  d={g.path}
+                  fill="none"
+                  stroke={tone}
+                  strokeWidth={active || isSelEdge ? 3 : 2}
+                  markerEnd={active ? "url(#arr-hl)" : "url(#arr)"}
+                  opacity={active ? 1 : 0.85}
                 />
-              )}
-              {tone && <circle cx={s.x} cy={s.y} r={STATE_R + 8} fill="none" stroke={TONE_VAR[tone]} strokeWidth="1.5" opacity="0.55" filter="url(#state-glow)" />}
-              {s.isAccepting && <circle cx={s.x} cy={s.y} r={STATE_R + 5} fill="none" stroke={stroke} strokeWidth="1.8" />}
-              <circle
-                cx={s.x}
-                cy={s.y}
-                r={STATE_R}
-                fill={tone ? `color-mix(in srgb, ${TONE_VAR[tone]} 22%, var(--bg-panel))` : "var(--bg-panel-raised)"}
-                stroke={stroke}
-                strokeWidth={isSel || tone ? 2.6 : 1.8}
-              />
-              <text
-                x={s.x}
-                y={s.y + 4.5}
-                textAnchor="middle"
-                fontFamily="var(--font-mono-family)"
-                fontSize="13"
-                fill="var(--ink-primary)"
-              >
-                {s.label}
-              </text>
-              {annotations.includes(s.label) && (
                 <text
-                  x={s.x + STATE_R - 2}
-                  y={s.y - STATE_R + 2}
+                  x={g.labelX}
+                  y={g.labelY}
                   textAnchor="middle"
-                  fontSize="15"
-                  fontWeight="700"
-                  fill="var(--signal-amber)"
+                  fontFamily="var(--font-mono-family)"
+                  fontSize="13"
+                  fill={
+                    active
+                      ? "var(--signal-blue)"
+                      : isSelEdge
+                        ? "var(--signal-amber)"
+                        : "var(--ink-primary)"
+                  }
+                  style={{ paintOrder: "stroke", stroke: "var(--bg-canvas)", strokeWidth: 6 }}
                 >
-                  ?
+                  {isolateSymbol
+                    ? t.symbols.filter((s) => s === isolateSymbol).join(",") || t.symbols.join(",")
+                    : t.symbols.join(",")}
                 </text>
-              )}
-              {confirming && (
-                <text x={s.x} y={s.y + STATE_R + 20} textAnchor="middle" fontSize="10" fill="var(--signal-amber)">
-                  click again to delete
-                </text>
-              )}
-            </g>
-          );
-        })}
+                {isSelEdge && editable && (
+                  <text
+                    x={g.labelX}
+                    y={g.labelY + 16}
+                    textAnchor="middle"
+                    fontSize="9.5"
+                    fill="var(--signal-amber)"
+                  >
+                    press Delete to remove
+                  </text>
+                )}
+              </g>
+            );
+          })}
 
-        {!machine.states.length && (
-          <text x={CANVAS_W / 2} y={CANVAS_H / 2} textAnchor="middle" fill="var(--ink-disabled)" fontSize="14">
-            Click to add a state
-          </text>
-        )}
+          {machine.states.map((s) => {
+            const tone = highlights[s.label];
+            const isSel = selected === s.id || transFrom === s.id;
+            const confirming = confirmDelete === s.id;
+            const stroke = confirming
+              ? "var(--signal-amber)"
+              : tone
+                ? TONE_VAR[tone]
+                : isSel
+                  ? "var(--signal-blue)"
+                  : "var(--border-strong)";
+            return (
+              <g
+                key={s.id}
+                style={{
+                  cursor:
+                    editable && mode === "pointer"
+                      ? dragging === s.id
+                        ? "grabbing"
+                        : "grab"
+                      : "inherit",
+                }}
+              >
+                {s.isStart && (
+                  <path
+                    d={`M ${s.x - STATE_R - 30} ${s.y} L ${s.x - STATE_R - 5} ${s.y}`}
+                    stroke="var(--signal-blue)"
+                    strokeWidth="2.5"
+                    markerEnd="url(#arr-hl)"
+                  />
+                )}
+                {tone && (
+                  <circle
+                    cx={s.x}
+                    cy={s.y}
+                    r={STATE_R + 8}
+                    fill="none"
+                    stroke={TONE_VAR[tone]}
+                    strokeWidth="1.5"
+                    opacity="0.55"
+                    filter="url(#state-glow)"
+                  />
+                )}
+                {s.isAccepting && (
+                  <circle
+                    cx={s.x}
+                    cy={s.y}
+                    r={STATE_R + 5}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth="1.8"
+                  />
+                )}
+                <circle
+                  cx={s.x}
+                  cy={s.y}
+                  r={STATE_R}
+                  fill={
+                    tone
+                      ? `color-mix(in srgb, ${TONE_VAR[tone]} 22%, var(--bg-panel))`
+                      : "var(--bg-panel-raised)"
+                  }
+                  stroke={stroke}
+                  strokeWidth={isSel || tone ? 2.6 : 1.8}
+                />
+                <text
+                  x={s.x}
+                  y={s.y + 4.5}
+                  textAnchor="middle"
+                  fontFamily="var(--font-mono-family)"
+                  fontSize="13"
+                  fill="var(--ink-primary)"
+                >
+                  {s.label}
+                </text>
+                {annotations.includes(s.label) && (
+                  <text
+                    x={s.x + STATE_R - 2}
+                    y={s.y - STATE_R + 2}
+                    textAnchor="middle"
+                    fontSize="15"
+                    fontWeight="700"
+                    fill="var(--signal-amber)"
+                  >
+                    ?
+                  </text>
+                )}
+                {confirming && (
+                  <text
+                    x={s.x}
+                    y={s.y + STATE_R + 20}
+                    textAnchor="middle"
+                    fontSize="10"
+                    fill="var(--signal-amber)"
+                  >
+                    click again to delete
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {!machine.states.length && (
+            <text
+              x={CANVAS_W / 2}
+              y={CANVAS_H / 2}
+              textAnchor="middle"
+              fill="var(--ink-disabled)"
+              fontSize="14"
+            >
+              Click to add a state
+            </text>
+          )}
         </g>
       </svg>
 
@@ -668,7 +789,11 @@ export function DFACanvas({
                   data-blocked={conflict}
                   disabled={conflict}
                   onClick={() => toggleSymbol(sym)}
-                  title={conflict ? "Determinism: this symbol is already used from this state" : undefined}
+                  title={
+                    conflict
+                      ? "Determinism: this symbol is already used from this state"
+                      : undefined
+                  }
                 >
                   {sym}
                 </button>
@@ -703,7 +828,11 @@ export function DFACanvas({
               onSubmit={(e) => {
                 e.preventDefault();
                 const value = renaming.value.trim();
-                if (value) onChange?.((prev) => ({ ...prev, states: prev.states.map((s) => (s.id === menu.id ? { ...s, label: value } : s)) }));
+                if (value)
+                  onChange?.((prev) => ({
+                    ...prev,
+                    states: prev.states.map((s) => (s.id === menu.id ? { ...s, label: value } : s)),
+                  }));
                 setRenaming(null);
                 setMenu(null);
               }}
@@ -720,7 +849,10 @@ export function DFACanvas({
               <MenuItem
                 label="Set as start"
                 onClick={() => {
-                  onChange?.((prev) => ({ ...prev, states: prev.states.map((s) => ({ ...s, isStart: s.id === menu.id })) }));
+                  onChange?.((prev) => ({
+                    ...prev,
+                    states: prev.states.map((s) => ({ ...s, isStart: s.id === menu.id })),
+                  }));
                   setMenu(null);
                 }}
               />
@@ -729,12 +861,17 @@ export function DFACanvas({
                 onClick={() => {
                   onChange?.((prev) => ({
                     ...prev,
-                    states: prev.states.map((s) => (s.id === menu.id ? { ...s, isAccepting: !s.isAccepting } : s)),
+                    states: prev.states.map((s) =>
+                      s.id === menu.id ? { ...s, isAccepting: !s.isAccepting } : s,
+                    ),
                   }));
                   setMenu(null);
                 }}
               />
-              <MenuItem label="Rename…" onClick={() => setRenaming({ id: menu.id, value: byId(menu.id)?.label ?? "" })} />
+              <MenuItem
+                label="Rename…"
+                onClick={() => setRenaming({ id: menu.id, value: byId(menu.id)?.label ?? "" })}
+              />
               <MenuItem label="Delete state" tone="reject" onClick={() => deleteState(menu.id)} />
             </>
           )}
@@ -744,7 +881,15 @@ export function DFACanvas({
   );
 }
 
-function MenuItem({ label, onClick, tone }: { label: string; onClick: () => void; tone?: "reject" }) {
+function MenuItem({
+  label,
+  onClick,
+  tone,
+}: {
+  label: string;
+  onClick: () => void;
+  tone?: "reject";
+}) {
   return (
     <button
       className="block w-full px-3 py-2 text-left transition-colors hover:bg-[var(--signal-blue-10)]"

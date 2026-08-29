@@ -29,7 +29,10 @@ const PUBLIC_TIER = new Set(["converter", "nfa", "mutation"]);
 export const SEQUENCE_FALLBACK =
   "That's the step you're about to derive — try it first. Name the in-edges and out-edges involved, take a swing at the substitution, and I'll tell you whether it holds.";
 
-export function checkReply(reply: string, ctx: GuardContext): { allowed: boolean; reason?: string; fallback: string } {
+export function checkReply(
+  reply: string,
+  ctx: GuardContext,
+): { allowed: boolean; reason?: string; fallback: string } {
   if (PUBLIC_TIER.has(ctx.moduleId)) {
     // Nothing is hidden here — the only leak is pre-empting an unrevealed step.
     if (ctx.finalVisible === false && REGEX_REVEAL.test(reply)) {
@@ -39,17 +42,32 @@ export function checkReply(reply: string, ctx: GuardContext): { allowed: boolean
   }
 
   const tableRows = reply.match(TABLE_ROW)?.length ?? 0;
-  if (tableRows >= 2) return { allowed: false, reason: "transition-table dump", fallback: FALLBACK_MESSAGE };
+  if (tableRows >= 2)
+    return { allowed: false, reason: "transition-table dump", fallback: FALLBACK_MESSAGE };
 
   const edges = reply.match(EDGE_MENTION)?.length ?? 0;
-  if (edges >= 2) return { allowed: false, reason: "explicit edge listing", fallback: FALLBACK_MESSAGE };
+  if (edges >= 2)
+    return { allowed: false, reason: "explicit edge listing", fallback: FALLBACK_MESSAGE };
 
   for (const p of LEAK_PATTERNS) {
-    if (p.test(reply)) return { allowed: false, reason: `pattern ${p.source.slice(0, 24)}`, fallback: FALLBACK_MESSAGE };
+    if (p.test(reply))
+      return {
+        allowed: false,
+        reason: `pattern ${p.source.slice(0, 24)}`,
+        fallback: FALLBACK_MESSAGE,
+      };
   }
 
-  if (ctx.moduleId === "discovery" && REGEX_REVEAL.test(reply) && /this language|the language is|target language/i.test(reply)) {
-    return { allowed: false, reason: "regex reveal of hidden language", fallback: FALLBACK_MESSAGE };
+  if (
+    ctx.moduleId === "discovery" &&
+    REGEX_REVEAL.test(reply) &&
+    /this language|the language is|target language/i.test(reply)
+  ) {
+    return {
+      allowed: false,
+      reason: "regex reveal of hidden language",
+      fallback: FALLBACK_MESSAGE,
+    };
   }
 
   return { allowed: true, fallback: FALLBACK_MESSAGE };

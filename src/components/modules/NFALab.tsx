@@ -30,7 +30,11 @@ const PRESETS: Preset[] = [
     nfa: new NFA({
       states: ["p0", "p1", "p2"],
       alphabet: ["a", "b"],
-      transitions: { p0: { a: ["p0", "p1"], b: ["p0"] }, p1: { b: ["p2"] }, p2: { a: ["p2"], b: ["p2"] } },
+      transitions: {
+        p0: { a: ["p0", "p1"], b: ["p0"] },
+        p1: { b: ["p2"] },
+        p2: { a: ["p2"], b: ["p2"] },
+      },
       startStates: ["p0"],
       acceptStates: ["p2"],
     }),
@@ -93,7 +97,9 @@ export function NFALab() {
     // include all nondeterministic branches as extra edges by manual construction
     const machine = layoutMachine(
       dfaToMachine(
-        new (Object.getPrototypeOf(preset.nfa.toDFA().dfa).constructor as new (a: unknown) => never)(dfaLike) as never,
+        new (
+          Object.getPrototypeOf(preset.nfa.toDFA().dfa).constructor as new (a: unknown) => never
+        )(dfaLike) as never,
       ),
     );
     const idOf = (label: string) => machine.states.find((s) => s.label === label)?.id;
@@ -114,7 +120,10 @@ export function NFALab() {
     return machine;
   }, [preset]);
 
-  const dfaMachine = useMemo(() => (converted ? layoutMachine(dfaToMachine(preset.nfa.toDFA().dfa)) : null), [converted, preset]);
+  const dfaMachine = useMemo(
+    () => (converted ? layoutMachine(dfaToMachine(preset.nfa.toDFA().dfa)) : null),
+    [converted, preset],
+  );
 
   const convert = () => {
     const { dfa, steps } = preset.nfa.toDFA();
@@ -131,7 +140,8 @@ export function NFALab() {
           </span>
           <h2 className="mt-2 text-lg">Subset construction</h2>
           <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
-            {preset.description} ε-edges are labelled <span style={{ fontFamily: "var(--font-mono-family)" }}>ε</span>.
+            {preset.description} ε-edges are labelled{" "}
+            <span style={{ fontFamily: "var(--font-mono-family)" }}>ε</span>.
           </p>
         </div>
 
@@ -164,9 +174,15 @@ export function NFALab() {
           </div>
           {converted ? (
             <>
-              <div className="flex max-h-48 flex-col gap-1 overflow-y-auto text-[11px]" style={{ fontFamily: "var(--font-mono-family)" }}>
+              <div
+                className="flex max-h-48 flex-col gap-1 overflow-y-auto text-[11px]"
+                style={{ fontFamily: "var(--font-mono-family)" }}
+              >
                 {converted.steps.slice(0, logStep + 1).map((s, i) => (
-                  <div key={i} style={{ color: i === logStep ? "var(--ink-primary)" : "var(--ink-muted)" }}>
+                  <div
+                    key={i}
+                    style={{ color: i === logStep ? "var(--ink-primary)" : "var(--ink-muted)" }}
+                  >
                     {s}
                   </div>
                 ))}
@@ -178,7 +194,10 @@ export function NFALab() {
                 <button className="tool-btn" onClick={() => setLogStep(converted.steps.length - 1)}>
                   ▶▶
                 </button>
-                <button className="tool-btn" onClick={() => setLogStep((s) => Math.min(converted.steps.length - 1, s + 1))}>
+                <button
+                  className="tool-btn"
+                  onClick={() => setLogStep((s) => Math.min(converted.steps.length - 1, s + 1))}
+                >
                   ▶|
                 </button>
               </div>
@@ -204,17 +223,35 @@ export function NFALab() {
             </button>
           </div>
         </div>
-        <div className="dual-canvas grid flex-1 min-h-0 gap-px" style={{ gridTemplateColumns: "1fr 1fr", background: "var(--border-subtle)" }}>
+        <div
+          className="dual-canvas grid flex-1 min-h-0 gap-px"
+          style={{ gridTemplateColumns: "1fr 1fr", background: "var(--border-subtle)" }}
+        >
           <div className="flex min-h-0 flex-col">
             <div className="section-label px-3 py-2">NFA (preset)</div>
-            <DFACanvas machine={nfaMachine} alphabet={[...preset.alphabet, EPS]} editable={false} allowNondet allowEpsilon mode="pointer" />
+            <DFACanvas
+              machine={nfaMachine}
+              alphabet={[...preset.alphabet, EPS]}
+              editable={false}
+              allowNondet
+              allowEpsilon
+              mode="pointer"
+            />
           </div>
           <div className="flex min-h-0 flex-col">
             <div className="section-label px-3 py-2">Result DFA</div>
             {dfaMachine ? (
-              <DFACanvas machine={dfaMachine} alphabet={preset.alphabet} editable={false} mode="pointer" />
+              <DFACanvas
+                machine={dfaMachine}
+                alphabet={preset.alphabet}
+                editable={false}
+                mode="pointer"
+              />
             ) : (
-              <div className="canvas-surface flex items-center justify-center text-xs" style={{ color: "var(--ink-disabled)" }}>
+              <div
+                className="canvas-surface flex items-center justify-center text-xs"
+                style={{ color: "var(--ink-disabled)" }}
+              >
                 No result yet
               </div>
             )}

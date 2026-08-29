@@ -72,18 +72,22 @@ export function ChallengePicker({
                   Nothing here yet.
                 </div>
               )}
-              {s.items.map((c) => (
+              {s.items.map((c, i) => {
+                const hidden = maskNames && !solvedIds.has(c.id);
+                return (
                 <div key={c.id} className="flex items-center gap-1 px-2 py-1">
                   <button
                     className="flex-1 truncate rounded-lg px-2 py-1.5 text-left text-xs transition-colors"
                     onClick={() => onPick(c)}
+                    title={hidden ? "Hidden until you solve it" : c.name}
                     style={{
                       background: activeId === c.id ? "var(--signal-blue-15)" : "transparent",
                       color: activeId === c.id ? "var(--ink-primary)" : "var(--ink-muted)",
+                      fontFamily: hidden ? "var(--font-mono, monospace)" : undefined,
                     }}
                   >
                     {activeId === c.id ? "● " : ""}
-                    {c.name}
+                    {hidden ? `${s.label} #${i + 1} · locked` : c.name}
                   </button>
                   <button
                     className="tool-btn"

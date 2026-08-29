@@ -20,19 +20,19 @@ for (const c of FIXED_CHALLENGES) {
   const errs = validateDFA(c.dfa);
   ok(errs.length === 0, `challenge ${c.id} validateDFA: ${errs.join("; ")}`);
   const S = strings(c.alphabet, 6);
-  const acc = S.filter(s => c.dfa.accepts(s));
+  const acc = S.filter(s => c.dfa.run(s));
   ok(acc.length > 0, `challenge ${c.id} accepts nothing up to len 6`);
   ok(acc.length < S.length, `challenge ${c.id} accepts everything (trivial)`);
   // minimize preserves language
   const m = minimize(c.dfa);
-  ok(S.every(s => m.accepts(s) === c.dfa.accepts(s)), `minimize changed language for ${c.id}`);
+  ok(S.every(s => m.run(s) === c.dfa.run(s)), `minimize changed language for ${c.id}`);
   ok(isEquivalent(m, c.dfa), `isEquivalent(min, orig) false for ${c.id}`);
   ok(findCounterexample(m, c.dfa) === null, `spurious counterexample for ${c.id}`);
   // idempotent
   ok(minimize(m).toJSON().states.length === m.toJSON().states.length, `minimize not idempotent for ${c.id}`);
   // DFA -> NFA -> DFA roundtrip
   const back = toDfa(liftToNfa(c.dfa));
-  ok(S.every(s => back.accepts(s) === c.dfa.accepts(s)), `dfa->nfa->dfa roundtrip broke ${c.id}`);
+  ok(S.every(s => back.run(s) === c.dfa.run(s)), `dfa->nfa->dfa roundtrip broke ${c.id}`);
   // DFA -> regex -> DFA roundtrip
   const { regex } = nfaToRegex(liftToNfa(c.dfa));
   if (regex === null) { fail++; console.log("FAIL: nfaToRegex null for", c.id); }
@@ -42,7 +42,7 @@ for (const c of FIXED_CHALLENGES) {
     const rd = regexToDFA(regex, c.alphabet);
     if (!rd) { fail++; console.log("FAIL: regexToDFA null for", c.id, regex); }
     else {
-      const bad = S.find(s => rd.accepts(s) !== c.dfa.accepts(s));
+      const bad = S.find(s => rd.run(s) !== c.dfa.run(s));
       ok(bad === undefined, `regex roundtrip mismatch ${c.id}: regex=${regex} str="${bad}"`);
     }
   }
@@ -59,8 +59,8 @@ const cases: [string, string[], string[]][] = [
 for (const [re, yes, no] of cases) {
   const d = regexToDFA(re, ["0","1"]);
   if (!d) { fail++; console.log("FAIL: regexToDFA null:", re); continue; }
-  for (const s of yes) ok(d.accepts(s), `${re} should accept "${s}"`);
-  for (const s of no) ok(!d.accepts(s), `${re} should reject "${s}"`);
+  for (const s of yes) ok(d.run(s), `${re} should accept "${s}"`);
+  for (const s of no) ok(!d.run(s), `${re} should reject "${s}"`);
 }
 
 // 3. epsilon removal preserves language
@@ -74,18 +74,18 @@ ok(!hasEpsilon(cleaned), "removeEpsilons left epsilons");
 {
   const S = strings(["0","1"], 7);
   const a = toDfa(enfa), b = toDfa(cleaned);
-  const bad = S.find(s => a.accepts(s) !== b.accepting && a.accepts(s) !== b.accepts(s));
-  ok(S.every(s => a.accepts(s) === b.accepts(s)), `removeEpsilons changed language at "${bad}"`);
+  const bad = S.find(s => a.run(s) !== b.run(s));
+  ok(S.every(s => a.run(s) === b.run(s)), `removeEpsilons changed language at "${bad}"`);
 }
 
 // 4. Generator sanity across difficulties
 for (const diff of ["Easy","Medium","Hard"] as const) {
   for (let i = 0; i < 12; i++) {
-    const c = (challengeGenerator as any).generate ? (challengeGenerator as any).generate(diff) : null;
+    const c = challengeGenerator.random();
     if (!c) break;
     ok(validateDFA(c.dfa).length === 0, `generated ${diff} #${i} invalid`);
     const S = strings(c.alphabet, 6);
-    const acc = S.filter((s: string) => c.dfa.accepts(s));
+    const acc = S.filter((s: string) => c.dfa.run(s));
     ok(acc.length > 0 && acc.length < S.length, `generated ${diff} #${i} trivial language (${acc.length}/${S.length})`);
   }
 }
@@ -96,7 +96,7 @@ for (const diff of ["Easy","Medium","Hard"] as const) {
   const b = regexToDFA("(0|1)*1", ["0","1"])!;
   const ce = findCounterexample(a, b);
   ok(ce !== null, "expected counterexample between complement languages");
-  if (ce) ok(a.accepts(ce.str) !== b.accepts(ce.str), `counterexample "${ce.str}" is not a real witness`);
+  if (ce) ok(a.run(ce.str) !== b.run(ce.str), `counterexample "${ce.str}" is not a real witness`);
   ok(!isEquivalent(a, b), "isEquivalent said equal for different languages");
 }
 
@@ -117,7 +117,7 @@ for (const diff of ["Easy","Medium","Hard"] as const) {
   const n2 = machineToNFA(m, FIXED_CHALLENGES[0]!.alphabet);
   const S = strings(FIXED_CHALLENGES[0]!.alphabet, 6);
   const A = toDfa(n), B = toDfa(n2);
-  ok(S.every(s => A.accepts(s) === B.accepts(s)), "machine<->NFA roundtrip changed language");
+  ok(S.every(s => A.run(s) === B.run(s)), "machine<->NFA roundtrip changed language");
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

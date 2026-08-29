@@ -101,7 +101,8 @@ export function ChallengePicker({
                     {Storage.isInLibrary(c.id) ? "✓" : "☆"}
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -3,13 +3,18 @@
 //   - TanStack devtools (dev-only, first), tanstackStart, viteReact, tailwindcss, tsConfigPaths,
 //     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// IALE ships as a purely static single-page app: every piece of state (BYOK key,
+// saved machines, progress, mistake stats) lives in the browser, and the tutor
+// calls the student's own provider directly. There is no per-request server data
+// dependency anywhere, so SPA mode + prerender of the shell is the honest target
+// and no server runtime (nor Netlify Function) is needed at runtime: the static
+// assets in dist/client are the whole deployable.
 export default defineConfig({
+  nitro: false,
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+    spa: { enabled: true, prerender: { crawlLinks: false } },
+    prerender: { enabled: true, crawlLinks: true },
   },
 });

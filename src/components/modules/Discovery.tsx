@@ -23,6 +23,7 @@ import {
 import { useCanvasShortcuts } from "@/lib/useCanvasShortcuts";
 import { buildDiscoveryContext } from "@/lib/tutor/context";
 import type { TutorAction } from "@/lib/tutor/actions";
+import { useCanvasAttention } from "@/lib/tutor/useCanvasAttention";
 
 interface Feedback {
   tone: "accept" | "reject" | "blue";
@@ -54,6 +55,9 @@ export function Discovery({
   const [creatorOpen, setCreatorOpen] = useState(false);
   const { machine, commit, set, replace, undo, redo, canUndo, canRedo } = useMachine(starterMachine());
   const saveTimer = useRef<number | null>(null);
+  /** Tutor difficulty bias (IALE_ADJUST_DIFFICULTY) applied to the next generated language. */
+  const bias = useRef(0);
+  const attention = useCanvasAttention(active, () => commit((m) => layoutMachine(m)));
 
   const alphabet = challenge.alphabet;
   const dfa = useMemo(() => machineToDFA(machine, alphabet), [machine, alphabet]);
@@ -196,7 +200,11 @@ export function Discovery({
   };
 
   const loadRandom = () => {
-    const ch = challengeGenerator.random();
+    // Difficulty bias from the tutor: "suffix" is the gentlest generator shape,
+    // "countMod" the most demanding; no bias means a free random draw.
+    const ch = challengeGenerator.random(
+      bias.current > 0 ? "countMod" : bias.current < 0 ? "suffix" : undefined,
+    );
     if (!ch) {
       toast.error("Generator hiccup — try again");
       return;
@@ -225,6 +233,10 @@ export function Discovery({
       if (action.type === "highlight") flashState(action.state, action.color, 3000);
       if (action.type === "test" || action.type === "animate") runExample(action.value);
       if (action.type === "showExample") addExample(action.str, action.accept);
+      if (action.type === "adjustDifficulty") {
+        bias.current = action.direction === "up" ? 1 : -1;
+        toast(action.direction === "up" ? "Next language will be a step harder" : "Next language will be gentler");
+      }
       if (action.type === "challenge") {
         const ch = challengeGenerator.fromRegex(action.regex, action.alphabet, {
           name: action.name,
@@ -390,7 +402,17 @@ export function Discovery({
           </button>
         </CanvasToolbar>
 
-        <DFACanvas machine={machine} onChange={commit} onTransientChange={set} alphabet={alphabet} mode={mode} highlights={highlights} />
+        <DFACanvas
+          machine={machine}
+          onChange={commit}
+          onTransientChange={set}
+          alphabet={alphabet}
+          mode={mode}
+          highlights={highlights}
+          isolateSymbol={attention.isolateSymbol}
+          annotations={attention.annotations}
+          highlightTransition={attention.highlightTransition}
+        />
 
         <div
           className="flex min-h-[64px] flex-col justify-center gap-1 px-4 py-3"

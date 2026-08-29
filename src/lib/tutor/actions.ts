@@ -26,6 +26,7 @@ export type TutorAction =
   | { type: "gotoTab"; tab: string }
   | { type: "showExample"; str: string; accept: boolean }
   | { type: "readAloud"; text: string }
+  | { type: "sketch"; title: string; spec: string }
   | { type: "exportNotes" }
   | { type: "challenge"; name: string; regex: string; difficulty: string; alphabet: string[] };
 
@@ -65,6 +66,9 @@ export const ACTION_REGISTRY: Record<string, Builder> = {
     a["str"] !== undefined ? { type: "showExample", str: a["str"], accept: a["accept"] !== "false" } : null,
   READ_ALOUD_SUMMARY: (a) => (a["text"] ? { type: "readAloud", text: a["text"] } : null),
   EXPORT_SESSION_NOTES: () => ({ type: "exportNotes" }),
+  // Scratch sketch: illustrative dummy machine only (tier: PUBLIC by
+  // construction — it never receives the student's real machine).
+  SKETCH: (a) => (a["spec"] ? { type: "sketch", title: a["title"] || "generic example", spec: a["spec"] } : null),
   CHALLENGE: (a) =>
     a["regex"]
       ? {
@@ -93,7 +97,7 @@ export function parseTutorActions(text: string): { cleanText: string; actions: T
   // the two-tool budget, since they never carry content.
   const firstChallenge = actions.findIndex((x) => x.type === "challenge");
   const filtered = actions.filter((x, i) => x.type !== "challenge" || i === firstChallenge);
-  const cosmetic = new Set(["annotateState", "isolateSymbol", "zoomTo", "simplifyLayout", "linkConcept", "readAloud"]);
+  const cosmetic = new Set(["annotateState", "isolateSymbol", "zoomTo", "simplifyLayout", "linkConcept", "readAloud", "sketch"]);
   const budgeted: TutorAction[] = [];
   let spent = 0;
   for (const a of filtered) {

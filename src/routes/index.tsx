@@ -64,11 +64,10 @@ function Index() {
   // aggregate record so the tutor can connect today's slip to a recurring habit.
   const getContext = useCallback(() => {
     const base = contexts.current[tab]?.() ?? `Module: ${tab}. No context available.`;
-    const stats = Storage.getStats();
     const habits = detectMisconceptions(Storage.getAllMistakes());
     return [
       base,
-      `Learner record: attempted ${stats.attempted?.length ?? Storage.countAttemptedUnique()} unique challenges, solved ${Storage.countSolvedUnique()}.`,
+      `Learner record: attempted ${Storage.countAttemptedUnique()} unique challenges, solved ${Storage.countSolvedUnique()}.`,
       habits.length ? `Recurring habits: ${habits.join(" ")}` : "No recurring habit detected yet.",
     ].join("\n");
   }, [tab]);

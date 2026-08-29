@@ -10,8 +10,9 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // calls the student's own provider directly. There is no per-request server data
 // dependency anywhere, so SPA mode + prerender of the shell is the honest target
 // and no server runtime (nor Netlify Function) is needed at runtime: the static
-// assets in .output/public are the whole deployable.
+// assets in dist/client are the whole deployable.
 export default defineConfig({
+  nitro: false,
   tanstackStart: {
     spa: { enabled: true, prerender: { crawlLinks: false } },
     prerender: { enabled: true, crawlLinks: true },

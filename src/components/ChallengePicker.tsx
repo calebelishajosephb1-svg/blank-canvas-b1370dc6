@@ -19,10 +19,14 @@ export function ChallengePicker({
   const [open, setOpen] = useState<string | null>("Easy");
   const [ai, setAi] = useState<Challenge[]>([]);
   const [library, setLibrary] = useState<Challenge[]>([]);
+  const [solvedIds, setSolvedIds] = useState<Set<string>>(new Set());
 
   const refresh = () => {
     setAi(Storage.getAIChallenges());
     setLibrary(Storage.getLibrary());
+    setSolvedIds(
+      new Set(Object.keys(Storage.getStats().solves).map((k) => k.split(":").slice(1).join(":"))),
+    );
   };
 
   useEffect(() => {
@@ -31,10 +35,12 @@ export function ChallengePicker({
     window.addEventListener("iale-ai-challenge-updated", handler);
     window.addEventListener("iale-library-updated", handler);
     window.addEventListener("iale-data-cleared", handler);
+    window.addEventListener("iale-stats-updated", handler);
     return () => {
       window.removeEventListener("iale-ai-challenge-updated", handler);
       window.removeEventListener("iale-library-updated", handler);
       window.removeEventListener("iale-data-cleared", handler);
+      window.removeEventListener("iale-stats-updated", handler);
     };
   }, []);
 

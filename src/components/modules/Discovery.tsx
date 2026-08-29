@@ -413,6 +413,7 @@ export function Discovery({
 
         <ChallengePicker
           activeId={challenge.id}
+          maskNames
           extra={extra}
           onPick={(c) =>
             setChallengeAndReset(

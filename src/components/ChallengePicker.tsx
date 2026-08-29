@@ -8,10 +8,13 @@ export function ChallengePicker({
   activeId,
   onPick,
   extra,
+  maskNames = false,
 }: {
   activeId: string | null;
   onPick: (c: Challenge) => void;
   extra?: Challenge[];
+  /** Discovery mode: never spoil the name of a language the learner hasn't solved yet. */
+  maskNames?: boolean;
 }) {
   const [open, setOpen] = useState<string | null>("Easy");
   const [ai, setAi] = useState<Challenge[]>([]);

@@ -20,6 +20,7 @@ export function MutationLab({ active, onContext }: { active: boolean; onContext:
   const [history, setHistory] = useState<{ at: number; machine: Machine; label: string }[]>([]);
   const original = useMemo(() => layoutMachine(dfaToMachine(challenge.dfa)), [challenge]);
   const { machine, commit, set, replace, undo, redo, canUndo, canRedo } = useMachine(original);
+  const attention = useCanvasAttention(active, () => commit((m) => layoutMachine(m)));
 
   const alphabet = challenge.alphabet;
   const mutated = useMemo(() => machineToDFA(machine, alphabet), [machine, alphabet]);

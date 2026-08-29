@@ -24,6 +24,7 @@ export function Debugger({ active, onContext }: { active: boolean; onContext: (c
   const [highlights, setHighlights] = useState<Record<string, HighlightTone>>({});
   const [result, setResult] = useState<{ tone: "accept" | "reject"; title: string; body: string } | null>(null);
   const { machine, commit, set, replace, undo, redo, canUndo, canRedo } = useMachine(starterMachine());
+  const attention = useCanvasAttention(active, () => commit((m) => layoutMachine(m)));
 
   const alphabet = challenge.alphabet;
   const dfa = useMemo(() => machineToDFA(machine, alphabet), [machine, alphabet]);

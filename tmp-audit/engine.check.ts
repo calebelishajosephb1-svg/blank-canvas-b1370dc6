@@ -104,10 +104,13 @@ for (const diff of ["Easy","Medium","Hard"] as const) {
 {
   const a = FIXED_CHALLENGES[0]!.dfa, b = minimize(FIXED_CHALLENGES[0]!.dfa);
   const d = languageDiff(a, b);
-  ok(Array.isArray(d.nowAccepted) && Array.isArray(d.nowRejected), "languageDiff shape");
-  ok(d.nowAccepted.length === 0 && d.nowRejected.length === 0, "languageDiff found diff between equal DFAs");
-  const h = getTraceHint(a, b, "0101");
-  ok(typeof h === "object" && h !== null, "getTraceHint returned nothing");
+  ok(d.isEquivalent === true, "languageDiff: equal DFAs not reported equivalent");
+  ok(d.lostExample === null && d.gainedExample === null, "languageDiff: witnesses on equal DFAs");
+  for (const w of ["", "0", "0101", "1111", "0000"]) {
+    const h = getTraceHint(a, b, w);
+    ok(!!h.level1 && !!h.level2 && !!h.level3, `getTraceHint incomplete for "${w}"`);
+    ok(!/__SINK__/.test(h.level1 + h.level2 + h.level3), `getTraceHint leaks SINK label for "${w}"`);
+  }
 }
 
 // 7. machine <-> NFA roundtrip
